@@ -1,0 +1,2189 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ Панел – ТОДОРОВ Билдинг 92</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #0b0f19;
+      --panel-dark: rgba(22, 30, 49, 0.7);
+      --border-color: rgba(212, 175, 55, 0.25);
+      --gold: #d4af37;
+      --gold-hover: #b89327;
+      --text-white: #ffffff;
+      --text-muted: #94a3b8;
+      --success: #10b981;
+      --danger: #ef4444;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Outfit', 'Montserrat', sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text-white);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* --- LOGIN GATE --- */
+    #login-gate {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #1e293b 0%, #0b0f19 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+      transition: var(--transition);
+    }
+
+    #login-gate.hidden {
+      opacity: 0;
+      pointer-events: none;
+      transform: scale(1.05);
+    }
+
+    .login-card {
+      background: var(--panel-dark);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 450px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      animation: fadeInUp 0.6s ease;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-logo {
+      width: 150px;
+      margin-bottom: 20px;
+    }
+
+    .login-card h2 {
+      font-size: 24px;
+      margin-bottom: 10px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .login-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    .btn-login {
+      background: linear-gradient(135deg, var(--gold) 0%, var(--gold-hover) 100%);
+      color: #0b0f19;
+      border: none;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 700;
+      border-radius: 30px;
+      cursor: pointer;
+      width: 100%;
+      box-shadow: 0 4px 15px rgba(212, 175, 55, 0.4);
+      transition: var(--transition);
+    }
+
+    .btn-login:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(212, 175, 55, 0.6);
+    }
+
+    .login-note {
+      margin-top: 15px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* --- TOASTS --- */
+    .toast-container {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 10000;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .toast {
+      background: rgba(15, 23, 42, 0.95);
+      border-left: 4px solid var(--gold);
+      color: #fff;
+      padding: 16px 24px;
+      border-radius: 8px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 20px;
+      min-width: 300px;
+      animation: slideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: var(--transition);
+    }
+
+    .toast.success {
+      border-left-color: var(--success);
+    }
+
+    .toast.danger {
+      border-left-color: var(--danger);
+    }
+
+    @keyframes slideIn {
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
+    }
+
+    .toast-close {
+      cursor: pointer;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-weight: bold;
+    }
+
+    /* --- LAYOUT --- */
+    .app-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: rgba(15, 23, 42, 0.95);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 30px 20px;
+      position: fixed;
+      height: 100vh;
+      z-index: 99;
+    }
+
+    .sidebar-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .sidebar-logo {
+      height: 40px;
+    }
+
+    .sidebar-title {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--gold);
+    }
+
+    .nav-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex-grow: 1;
+    }
+
+    .nav-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 18px;
+      border: none;
+      background: none;
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      text-align: left;
+      transition: var(--transition);
+    }
+
+    .nav-btn:hover, .nav-btn.active {
+      color: var(--text-white);
+      background: rgba(212, 175, 55, 0.1);
+    }
+
+    .nav-btn.active {
+      border-left: 3px solid var(--gold);
+      background: rgba(212, 175, 55, 0.15);
+    }
+
+    .sidebar-footer {
+      padding-top: 20px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+    }
+
+    /* Main Content */
+    .main-content {
+      margin-left: 280px;
+      flex-grow: 1;
+      padding: 40px;
+      min-height: 100vh;
+    }
+
+    .content-header {
+      margin-bottom: 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .content-title h1 {
+      font-size: 28px;
+      font-weight: 800;
+      margin-bottom: 5px;
+    }
+
+    .content-title p {
+      color: var(--text-muted);
+      font-size: 14px;
+    }
+
+    /* Cards & Containers */
+    .dashboard-panel {
+      background: var(--panel-dark);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 30px;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .panel-section {
+      display: none;
+    }
+
+    .panel-section.active {
+      display: block;
+    }
+
+    /* Grid layouts */
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    /* Stats Card */
+    .stat-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .stat-card .icon-box {
+      width: 50px;
+      height: 50px;
+      border-radius: 10px;
+      background: rgba(212, 175, 55, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: var(--gold);
+    }
+
+    .stat-card .info h3 {
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    .stat-card .info p {
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Forms */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .form-control {
+      width: 100%;
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #fff;
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 14px;
+      transition: var(--transition);
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 8px rgba(212, 175, 55, 0.2);
+    }
+
+    textarea.form-control {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    .btn-save {
+      background: var(--gold);
+      color: #0b0f19;
+      border: none;
+      padding: 12px 24px;
+      font-size: 15px;
+      font-weight: 700;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-save:hover {
+      background: var(--gold-hover);
+    }
+
+    /* Page Selector styling */
+    .page-selector-container {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+
+    /* Image Upload UI */
+    .image-edit-box {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      background: rgba(255,255,255,0.02);
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px dashed rgba(255,255,255,0.1);
+    }
+
+    .image-preview {
+      width: 100px;
+      height: 80px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: #000;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .image-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .btn-upload-label {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: 4px;
+      cursor: pointer;
+      text-align: center;
+      transition: var(--transition);
+    }
+
+    .btn-upload-label:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* Lists Manager */
+    .list-section-header {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--gold);
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+      padding-bottom: 8px;
+      margin: 30px 0 15px 0;
+    }
+
+    .list-items-container {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .list-item-card {
+      background: rgba(255, 255, 255, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 10px;
+      padding: 16px;
+      position: relative;
+    }
+
+    .list-item-controls {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.03);
+      padding-top: 10px;
+    }
+
+    .btn-icon {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .btn-icon:hover {
+      background: rgba(255,255,255,0.1);
+    }
+
+    .btn-icon.delete:hover {
+      background: var(--danger);
+      border-color: var(--danger);
+    }
+
+    .btn-add-item {
+      background: none;
+      border: 1px dashed var(--gold);
+      color: var(--gold);
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+      margin-top: 10px;
+      transition: var(--transition);
+    }
+
+    .btn-add-item:hover {
+      background: rgba(212, 175, 55, 0.05);
+    }
+
+    /* Library Asset Box */
+    .assets-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+      gap: 16px;
+      max-height: 500px;
+      overflow-y: auto;
+      padding: 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    .asset-thumbnail-container {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+      position: relative;
+    }
+
+    .asset-thumbnail {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 6px;
+      margin-bottom: 8px;
+    }
+
+    .asset-name {
+      font-size: 11px;
+      color: var(--text-muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .btn-asset-delete {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: rgba(239, 68, 68, 0.9);
+      color: white;
+      border: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      font-size: 11px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      transition: var(--transition);
+    }
+
+    .asset-thumbnail-container:hover .btn-asset-delete {
+      opacity: 1;
+    }
+
+    /* Loading Spinner */
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(11, 15, 25, 0.8);
+      backdrop-filter: blur(4px);
+      z-index: 10001;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: var(--transition);
+    }
+
+    .loading-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-top: 4px solid var(--gold);
+      border-radius: 50%;
+      width: 50px;
+      height: 50px;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- LOADING OVERLAY -->
+  <div id="loading" class="loading-overlay">
+    <div class="spinner"></div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- LOGIN GATE -->
+  <div id="login-gate">
+    <div class="login-card">
+      <img src="assets/logo.png" alt="Todorov Building 92" class="login-logo">
+      <h2>Административен Панел</h2>
+      <p>Влезте в контролното табло на ТОДОРОВ Билдинг 92. Защитата с пароли е временно деактивирана за разработване.</p>
+      <button class="btn-login" onclick="bypassLogin()">Влез без парола</button>
+      <div class="login-note">Система за локална поддръжка v1.0</div>
+    </div>
+  </div>
+
+  <!-- APP CONTAINER -->
+  <div class="app-container">
+    
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <img src="assets/logo.png" alt="Logo" class="sidebar-logo">
+        <div class="sidebar-title">АДМИН ПАНЕЛ</div>
+      </div>
+      <nav class="nav-list">
+        <button class="nav-btn active" data-tab="overview" onclick="switchTab('overview')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+          Табло
+        </button>
+        <button class="nav-btn" data-tab="globals" onclick="switchTab('globals')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          Глобални контакти
+        </button>
+        <button class="nav-btn" data-tab="editor" onclick="switchTab('editor')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          Редактор на страници
+        </button>
+        <button class="nav-btn" data-tab="gallery" onclick="switchTab('gallery')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+          Галерия Мениджър
+        </button>
+        <button class="nav-btn" data-tab="assets" onclick="switchTab('assets')">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+          Файлова библиотека
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        © 2026 Todorov Building 92
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT -->
+    <main class="main-content">
+      
+      <!-- HEADER -->
+      <header class="content-header">
+        <div class="content-title">
+          <h1 id="tab-title">Контролно табло</h1>
+          <p id="tab-subtitle">Обща статистика и настройки на сайта</p>
+        </div>
+      </header>
+
+      <!-- OVERVIEW SECTION -->
+      <section id="sec-overview" class="panel-section active">
+        <div class="dashboard-panel">
+          <h2 style="font-size: 18px; margin-bottom: 20px; color: var(--gold);">Състояние на системата</h2>
+          <div class="grid-3">
+            <div class="stat-card">
+              <div class="icon-box">📄</div>
+              <div class="info">
+                <h3 id="stat-pages">7</h3>
+                <p>HTML страници</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="icon-box">🖼️</div>
+              <div class="info">
+                <h3 id="stat-assets">0</h3>
+                <p>Изображения в библиотеката</p>
+              </div>
+            </div>
+            <div class="stat-card">
+              <div class="icon-box">🛠️</div>
+              <div class="info">
+                <h3>Локален</h3>
+                <p>Режим на записване</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-panel">
+          <h2 style="font-size: 18px; margin-bottom: 20px; color: var(--gold);">Бързи връзки</h2>
+          <p style="color: var(--text-muted); font-size: 14px; line-height: 1.6; margin-bottom: 20px;">
+            Всички промени по съдържанието се записват директно в локалните HTML файлове. След като приключите с редакциите, просто качете промените в Git хранилището, за да се обновят на живия сайт в Vercel.
+          </p>
+          <div style="display: flex; gap: 15px;">
+            <a href="/" target="_blank" class="btn-save" style="text-decoration: none; text-align: center; width: auto; font-size: 13px;">Преглед на сайта ↗</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- GLOBALS SECTION -->
+      <section id="sec-globals" class="panel-section">
+        <div class="dashboard-panel">
+          <h2 style="font-size: 18px; margin-bottom: 20px; color: var(--gold);">Глобални контакти</h2>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px; line-height: 1.5;">
+            Промяната на тези полета автоматично ще обнови всички телефонни номера, имейли и адреси в хедъра, футера, мобилното меню и CTA секциите на всички страници в сайта!
+          </p>
+          <form id="globals-form" onsubmit="saveGlobals(event)">
+            <div class="grid-2">
+              <div class="form-group">
+                <label class="form-label" for="global-phone">Телефон (показван в текста)</label>
+                <input class="form-control" type="text" id="global-phone" value="089 572 4294" placeholder="089 572 4294" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="global-phone-link">Телефон за набиране (без интервали)</label>
+                <input class="form-control" type="text" id="global-phone-link" value="0895724294" placeholder="0895724294" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="global-email">Имейл адрес</label>
+                <input class="form-control" type="email" id="global-email" value="office@todorovbuilding.bg" required>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="global-address">Локация / Обслужван район</label>
+                <input class="form-control" type="text" id="global-address" value="гр. Ямбол и региона" required>
+              </div>
+              <div class="form-group full-width">
+                <label class="form-label" for="global-facebook">Facebook страница линк</label>
+                <input class="form-control" type="url" id="global-facebook" value="https://www.facebook.com/TodorovBuilding92?mibextid=wwXIfr" required>
+              </div>
+            </div>
+            <button type="submit" class="btn-save" style="margin-top: 15px;">Запази глобалните контакти</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- PAGE EDITOR SECTION -->
+      <section id="sec-editor" class="panel-section">
+        <div class="page-selector-container">
+          <label class="form-label" for="page-select" style="margin-bottom:0;">Изберете страница за редакция:</label>
+          <select id="page-select" class="form-control" style="width: auto; display: inline-block;" onchange="loadPageFields()">
+            <!-- Options dynamically loaded -->
+          </select>
+        </div>
+
+        <div class="dashboard-panel">
+          <h2 style="font-size: 18px; margin-bottom: 20px; color: var(--gold);" id="page-edit-heading">Редакция на съдържание</h2>
+          <form id="editor-form" onsubmit="savePage(event)">
+            <!-- Dynamically generated fields go here -->
+            <div id="dynamic-fields-container"></div>
+            
+            <!-- Dynamically generated lists go here -->
+            <div id="dynamic-lists-container"></div>
+            
+            <button type="submit" class="btn-save" style="margin-top: 30px;">Запази промените по страницата</button>
+          </form>
+        </div>
+      </section>
+
+      <!-- GALLERY MANAGER SECTION -->
+      <section id="sec-gallery" class="panel-section">
+        <div class="dashboard-panel">
+          <h2 style="font-size: 18px; margin-bottom: 10px; color: var(--gold);">Управление на галерията</h2>
+          <p style="color: var(--text-muted); font-size: 13px; margin-bottom: 25px; line-height: 1.5;">
+            Редактирайте целия списък с изображения в галерията. Промените тук ще се запазят в главната страница <a href="/gallery.html" target="_blank" style="color:var(--gold);">gallery.html</a>, а първите 4 елемента ще се синхронизират автоматично като преглед на заглавната страница <a href="/index.html" target="_blank" style="color:var(--gold);">index.html</a>.
+          </p>
+
+          <div class="list-items-container" id="gallery-manager-list">
+            <!-- Dynamic gallery elements -->
+          </div>
+
+          <button class="btn-add-item" onclick="addGalleryItem()" style="padding: 14px; font-size: 14px; margin-top: 20px;">+ Добави ново изображение в галерията</button>
+          
+          <div style="margin-top: 30px; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 20px;">
+            <button class="btn-save" onclick="saveGalleryData()">Запази галерията глобално</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- FILE LIBRARY SECTION -->
+      <section id="sec-assets" class="panel-section">
+        <div class="dashboard-panel">
+          <h2 style="font-size: 18px; margin-bottom: 20px; color: var(--gold);">Качване на ново изображение</h2>
+          <div class="image-edit-box" style="padding: 24px;">
+            <div class="image-controls">
+              <label class="btn-upload-label" for="asset-library-upload">Изберете изображение от компютъра...</label>
+              <input type="file" id="asset-library-upload" accept="image/*" style="display:none;" onchange="uploadAssetToLibrary()">
+              <p style="color: var(--text-muted); font-size: 11px; margin-top: 5px;">Разрешени формати: JPG, JPEG, PNG, WEBP, SVG.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-panel">
+          <h2 style="font-size: 18px; margin-bottom: 20px; color: var(--gold);">Всички налични файлове в assets/</h2>
+          <div class="assets-grid" id="library-assets-grid">
+            <!-- Dynamically populated files -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script>
+    // System Globals
+    let activeTab = 'overview';
+    let pagesList = [];
+    let currentLoadedPage = '';
+    let parsedDocument = null;
+    let libraryAssets = [];
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', () => {
+      // Check if logged in in localStorage (mock authentication)
+      if (localStorage.getItem('t92_logged_in') === 'true') {
+        document.getElementById('login-gate').classList.add('hidden');
+        initDashboard();
+      }
+    });
+
+    function bypassLogin() {
+      localStorage.setItem('t92_logged_in', 'true');
+      document.getElementById('login-gate').classList.add('hidden');
+      initDashboard();
+      showToast('Добре дошли в административния панел!', 'success');
+    }
+
+    function initDashboard() {
+      showLoading(true);
+      Promise.all([
+        fetchPagesList(),
+        fetchAssetsList()
+      ]).then(() => {
+        showLoading(false);
+      }).catch(err => {
+        showLoading(false);
+        showToast('Грешка при инициализация: ' + err.message, 'danger');
+      });
+    }
+
+    // Tab Switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+      });
+      document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+
+      document.querySelectorAll('.panel-section').forEach(sec => {
+        sec.classList.remove('active');
+      });
+      document.getElementById(`sec-${tabName}`).classList.add('active');
+
+      activeTab = tabName;
+
+      // Update titles
+      const tabTitle = document.getElementById('tab-title');
+      const tabSubtitle = document.getElementById('tab-subtitle');
+
+      if (tabName === 'overview') {
+        tabTitle.textContent = 'Контролно табло';
+        tabSubtitle.textContent = 'Обща статистика и настройки на сайта';
+      } else if (tabName === 'globals') {
+        tabTitle.textContent = 'Глобални контакти';
+        tabSubtitle.textContent = 'Редактирайте телефони, имейли и локации навсякъде в сайта';
+        loadGlobalsFromFiles();
+      } else if (tabName === 'editor') {
+        tabTitle.textContent = 'Редактор на страници';
+        tabSubtitle.textContent = 'Променяйте текстове и изображения на отделните страници';
+        loadPageFields();
+      } else if (tabName === 'gallery') {
+        tabTitle.textContent = 'Галерия Мениджър';
+        tabSubtitle.textContent = 'Добавяйте, изтривайте и подреждайте снимките на обектите';
+        loadGalleryItems();
+      } else if (tabName === 'assets') {
+        tabTitle.textContent = 'Файлова библиотека';
+        tabSubtitle.textContent = 'Преглед и качване на изображения в папка assets';
+        fetchAssetsList();
+      }
+    }
+
+    // Loading overlay helper
+    function showLoading(active) {
+      if (active) {
+        document.getElementById('loading').classList.add('active');
+      } else {
+        document.getElementById('loading').classList.remove('active');
+      }
+    }
+
+    // Toast helper
+    function showToast(message, type = 'success') {
+      const container = document.getElementById('toast-container');
+      const toast = document.createElement('div');
+      toast.className = `toast ${type}`;
+      toast.innerHTML = `
+        <span>${message}</span>
+        <button class="toast-close" onclick="this.parentElement.remove()">✕</button>
+      `;
+      container.appendChild(toast);
+      
+      // Auto remove after 4 seconds
+      setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateY(10px)';
+        setTimeout(() => toast.remove(), 300);
+      }, 4000);
+    }
+
+    // --- API CALLS ---
+
+    function fetchPagesList() {
+      return fetch('/api/pages')
+        .then(res => res.json())
+        .then(data => {
+          pagesList = data;
+          document.getElementById('stat-pages').textContent = pagesList.length;
+          
+          // Populate select
+          const select = document.getElementById('page-select');
+          select.innerHTML = '';
+          pagesList.forEach(page => {
+            const opt = document.createElement('option');
+            opt.value = page;
+            opt.textContent = getFriendlyPageName(page);
+            select.appendChild(opt);
+          });
+        });
+    }
+
+    function fetchAssetsList() {
+      return fetch('/api/assets')
+        .then(res => res.json())
+        .then(data => {
+          libraryAssets = data;
+          document.getElementById('stat-assets').textContent = libraryAssets.length;
+          
+          // Populate library list
+          const grid = document.getElementById('library-assets-grid');
+          grid.innerHTML = '';
+          
+          if (libraryAssets.length === 0) {
+            grid.innerHTML = '<div style="grid-column: span 3; text-align: center; color: var(--text-muted); padding: 20px;">Няма качени файлове.</div>';
+            return;
+          }
+
+          libraryAssets.forEach(asset => {
+            const div = document.createElement('div');
+            div.className = 'asset-thumbnail-container';
+            div.innerHTML = `
+              <img class="asset-thumbnail" src="/${asset}" alt="${asset}">
+              <div class="asset-name" title="${asset.replace('assets/', '')}">${asset.replace('assets/', '')}</div>
+              <button class="btn-asset-delete" onclick="deleteAsset('${asset}')">✕</button>
+            `;
+            grid.appendChild(div);
+          });
+        });
+    }
+
+    function getFriendlyPageName(filename) {
+      const names = {
+        'index.html': 'Начало (index.html)',
+        'about.html': 'За нас (about.html)',
+        'gallery.html': 'Галерия (gallery.html)',
+        'contact.html': 'Контакти (contact.html)',
+        'service-rough-construction.html': 'Услуга: Груб строеж',
+        'service-finishing-works.html': 'Услуга: Довършителни работи',
+        'service-turnkey-projects.html': 'Услуга: Проекти до ключ'
+      };
+      return names[filename] || filename;
+    }
+
+    function deleteAsset(assetName) {
+      if (!confirm(`Сигурни ли сте, че искате да изтриете файла ${assetName}? Тази операция не може да бъде отменена!`)) {
+        return;
+      }
+      showLoading(true);
+      fetch(`/api/asset?name=${assetName}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+          showLoading(false);
+          if (data.success) {
+            showToast('Файлът е изтрит успешно!', 'success');
+            fetchAssetsList();
+          } else {
+            showToast('Грешка при изтриване: ' + data.error, 'danger');
+          }
+        }).catch(err => {
+          showLoading(false);
+          showToast('Сървърна грешка: ' + err.message, 'danger');
+        });
+    }
+
+    function uploadAssetToLibrary() {
+      const fileInput = document.getElementById('asset-library-upload');
+      if (fileInput.files.length === 0) return;
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      
+      showLoading(true);
+      reader.onload = function(e) {
+        const base64 = e.target.result;
+        fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            filename: file.name,
+            base64: base64
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          showLoading(false);
+          fileInput.value = ''; // clear input
+          if (data.success) {
+            showToast('Изображението е качено успешно!', 'success');
+            fetchAssetsList();
+          } else {
+            showToast('Грешка при качване: ' + data.error, 'danger');
+          }
+        }).catch(err => {
+          showLoading(false);
+          showToast('Сървърна грешка: ' + err.message, 'danger');
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // --- GLOBALS LOGIC ---
+
+    function loadGlobalsFromFiles() {
+      // Load current globals from index.html
+      showLoading(true);
+      fetch('/api/page?name=index.html')
+        .then(res => res.text())
+        .then(html => {
+          showLoading(false);
+          const doc = new DOMParser().parseFromString(html, 'text/html');
+          
+          const phoneEl = doc.querySelector('[data-global="phone"]');
+          const phoneLinkEl = doc.querySelector('[data-global-link="phone"]');
+          const emailEl = doc.querySelector('[data-global="email"]');
+          const addressEl = doc.querySelector('[data-global="address"]');
+          const facebookEl = doc.querySelector('[data-global-link="facebook"]');
+
+          if (phoneEl) document.getElementById('global-phone').value = phoneEl.textContent.trim();
+          if (phoneLinkEl) document.getElementById('global-phone-link').value = phoneLinkEl.getAttribute('href').replace('tel:', '');
+          if (emailEl) document.getElementById('global-email').value = emailEl.textContent.trim();
+          if (addressEl) document.getElementById('global-address').value = addressEl.textContent.trim();
+          if (facebookEl) document.getElementById('global-facebook').value = facebookEl.getAttribute('href');
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast('Грешка при зареждане на глобални контакти: ' + err.message, 'danger');
+        });
+    }
+
+    async function saveGlobals(e) {
+      e.preventDefault();
+      
+      const phone = document.getElementById('global-phone').value.trim();
+      const phoneLink = document.getElementById('global-phone-link').value.trim();
+      const email = document.getElementById('global-email').value.trim();
+      const address = document.getElementById('global-address').value.trim();
+      const facebook = document.getElementById('global-facebook').value.trim();
+
+      showLoading(true);
+      try {
+        // Iterate through all HTML files and update their globals
+        for (const pageName of pagesList) {
+          const res = await fetch(`/api/page?name=${pageName}`);
+          const htmlText = await res.text();
+          const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+          let changed = false;
+
+          // Update Phone texts
+          doc.querySelectorAll('[data-global="phone"]').forEach(el => {
+            if (el.textContent !== phone) {
+              el.textContent = phone;
+              changed = true;
+            }
+          });
+
+          // Update Phone hrefs
+          doc.querySelectorAll('[data-global-link="phone"]').forEach(el => {
+            const expectedHref = `tel:${phoneLink}`;
+            if (el.getAttribute('href') !== expectedHref) {
+              el.setAttribute('href', expectedHref);
+              changed = true;
+            }
+          });
+
+          // Update Email texts
+          doc.querySelectorAll('[data-global="email"]').forEach(el => {
+            if (el.textContent !== email) {
+              el.textContent = email;
+              changed = true;
+            }
+          });
+
+          // Update Email hrefs
+          doc.querySelectorAll('[data-global-link="email"]').forEach(el => {
+            const expectedHref = `mailto:${email}`;
+            if (el.getAttribute('href') !== expectedHref) {
+              el.setAttribute('href', expectedHref);
+              changed = true;
+            }
+          });
+
+          // Update Address texts
+          doc.querySelectorAll('[data-global="address"]').forEach(el => {
+            if (el.textContent !== address) {
+              el.textContent = address;
+              changed = true;
+            }
+          });
+
+          // Update Facebook links
+          doc.querySelectorAll('[data-global-link="facebook"]').forEach(el => {
+            if (el.getAttribute('href') !== facebook) {
+              el.setAttribute('href', facebook);
+              changed = true;
+            }
+          });
+
+          // Save page if there were changes
+          if (changed) {
+            const serializedHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
+            await fetch('/api/page', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: pageName, html: serializedHtml })
+            });
+          }
+        }
+        showLoading(false);
+        showToast('Глобалните контакти са обновени успешно на всички страници!', 'success');
+      } catch (err) {
+        showLoading(false);
+        showToast('Грешка при записване на глобални контакти: ' + err.message, 'danger');
+      }
+    }
+
+    // --- PAGE EDITOR LOGIC ---
+
+    function loadPageFields() {
+      const select = document.getElementById('page-select');
+      const filename = select.value;
+      if (!filename) return;
+
+      currentLoadedPage = filename;
+      document.getElementById('page-edit-heading').textContent = `Редакция на: ${getFriendlyPageName(filename)}`;
+
+      showLoading(true);
+      fetch(`/api/page?name=${filename}`)
+        .then(res => res.text())
+        .then(html => {
+          showLoading(false);
+          parsedDocument = new DOMParser().parseFromString(html, 'text/html');
+          
+          generateFieldsForm();
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast('Грешка при зареждане на страницата: ' + err.message, 'danger');
+        });
+    }
+
+    function generateFieldsForm() {
+      const fieldsContainer = document.getElementById('dynamic-fields-container');
+      const listsContainer = document.getElementById('dynamic-lists-container');
+      fieldsContainer.innerHTML = '';
+      listsContainer.innerHTML = '';
+
+      if (!parsedDocument) return;
+
+      // Extract general edits (texts & single images)
+      const editElements = parsedDocument.querySelectorAll('[data-edit]');
+      
+      if (editElements.length > 0) {
+        const title = document.createElement('h3');
+        title.className = 'list-section-header';
+        title.textContent = 'Основни текстови полета и изображения';
+        fieldsContainer.appendChild(title);
+        
+        const grid = document.createElement('div');
+        grid.className = 'grid-2';
+
+        editElements.forEach(el => {
+          const editKey = el.getAttribute('data-edit');
+          const fieldGroup = document.createElement('div');
+          fieldGroup.className = 'form-group';
+
+          // Label name: friendly formatted key
+          const labelText = getFriendlyLabel(editKey);
+          const label = document.createElement('label');
+          label.className = 'form-label';
+          label.textContent = labelText;
+          fieldGroup.appendChild(label);
+
+          if (el.tagName.toLowerCase() === 'img') {
+            // Image edit element
+            const currentSrc = el.getAttribute('src') || '';
+            const imgBox = document.createElement('div');
+            imgBox.className = 'image-edit-box';
+            
+            const preview = document.createElement('img');
+            preview.className = 'image-preview';
+            preview.src = '/' + currentSrc;
+            preview.id = `preview-${editKey}`;
+            imgBox.appendChild(preview);
+
+            const controls = document.createElement('div');
+            controls.className = 'image-controls';
+            
+            // Selector dropdown for current library assets
+            const select = document.createElement('select');
+            select.className = 'form-control';
+            select.style.fontSize = '12px';
+            select.style.padding = '6px';
+            select.id = `select-asset-${editKey}`;
+            
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = currentSrc;
+            defaultOpt.textContent = `Текущо: ${currentSrc.replace('assets/', '')}`;
+            select.appendChild(defaultOpt);
+
+            libraryAssets.forEach(asset => {
+              if (asset !== currentSrc) {
+                const opt = document.createElement('option');
+                opt.value = asset;
+                opt.textContent = asset.replace('assets/', '');
+                select.appendChild(opt);
+              }
+            });
+
+            select.onchange = () => {
+              preview.src = '/' + select.value;
+            };
+            controls.appendChild(select);
+
+            // Upload direct button
+            const uploadLabel = document.createElement('label');
+            uploadLabel.className = 'btn-upload-label';
+            uploadLabel.textContent = 'Качи ново...';
+            
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            fileInput.onchange = (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              showLoading(true);
+              const reader = new FileReader();
+              reader.onload = (re) => {
+                fetch('/api/upload', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ filename: file.name, base64: re.target.result })
+                })
+                .then(r => r.json())
+                .then(uploadData => {
+                  showLoading(false);
+                  if (uploadData.success) {
+                    showToast('Качено успешно!', 'success');
+                    // Add option to select
+                    const opt = document.createElement('option');
+                    opt.value = uploadData.url;
+                    opt.textContent = file.name;
+                    select.appendChild(opt);
+                    select.value = uploadData.url;
+                    preview.src = '/' + uploadData.url;
+                    
+                    // refresh assets library in background
+                    fetchAssetsList();
+                  } else {
+                    showToast('Грешка при качване: ' + uploadData.error, 'danger');
+                  }
+                }).catch(err => {
+                  showLoading(false);
+                  showToast(err.message, 'danger');
+                });
+              };
+              reader.readAsDataURL(file);
+            };
+            uploadLabel.appendChild(fileInput);
+            controls.appendChild(uploadLabel);
+
+            imgBox.appendChild(controls);
+            fieldGroup.appendChild(imgBox);
+          } else {
+            // Text or HTML edit element
+            let input;
+            const content = el.innerHTML.trim();
+            const textVal = el.textContent.trim();
+
+            if (textVal.length > 80 || content.includes('<br>') || content.includes('<p>')) {
+              input = document.createElement('textarea');
+              input.className = 'form-control';
+              // If it contains html tags, let's keep HTML, else text
+              input.value = el.innerHTML.trim();
+              input.setAttribute('data-content-type', 'html');
+            } else {
+              input = document.createElement('input');
+              input.type = 'text';
+              input.className = 'form-control';
+              input.value = textVal;
+              input.setAttribute('data-content-type', 'text');
+            }
+            input.id = `input-${editKey}`;
+            fieldGroup.appendChild(input);
+          }
+
+          grid.appendChild(fieldGroup);
+        });
+        
+        fieldsContainer.appendChild(grid);
+      }
+
+      // Extract repeating lists (data-list)
+      const listElements = parsedDocument.querySelectorAll('[data-list]');
+      listElements.forEach(listContainer => {
+        const listKey = listContainer.getAttribute('data-list');
+        
+        // Skip main gallery list here, as we have a dedicated section for it
+        if (listKey === 'gallery-main' || listKey === 'gallery-preview') {
+          return;
+        }
+
+        const section = document.createElement('div');
+        
+        const title = document.createElement('h3');
+        title.className = 'list-section-header';
+        title.textContent = `Групово редактиране: ${getFriendlyListLabel(listKey)}`;
+        section.appendChild(title);
+
+        const itemsContainer = document.createElement('div');
+        itemsContainer.className = 'list-items-container';
+        itemsContainer.id = `list-items-${listKey}`;
+
+        // Get template node (clone first child)
+        const items = listContainer.querySelectorAll('[data-item]');
+        
+        items.forEach((itemNode, idx) => {
+          const itemCard = generateListItemCard(listKey, itemNode, idx);
+          itemsContainer.appendChild(itemCard);
+        });
+
+        section.appendChild(itemsContainer);
+
+        // Add item button
+        const addBtn = document.createElement('button');
+        addBtn.className = 'btn-add-item';
+        addBtn.type = 'button';
+        addBtn.textContent = `+ Добави нов елемент към ${getFriendlyListLabel(listKey)}`;
+        addBtn.onclick = () => addListItem(listKey, listContainer);
+        section.appendChild(addBtn);
+
+        listsContainer.appendChild(section);
+      });
+    }
+
+    function generateListItemCard(listKey, itemNode, index) {
+      const card = document.createElement('div');
+      card.className = 'list-item-card';
+      card.setAttribute('data-list-key', listKey);
+      
+      const fieldsGrid = document.createElement('div');
+      fieldsGrid.className = 'grid-2';
+
+      // Find all editable fields inside this list item
+      const fields = itemNode.querySelectorAll('[data-field]');
+      fields.forEach((fieldNode, fieldIdx) => {
+        const fieldName = fieldNode.getAttribute('data-field');
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+        
+        const label = document.createElement('label');
+        label.className = 'form-label';
+        label.textContent = `${getFriendlyLabel(fieldName)} (елемент #${index + 1})`;
+        formGroup.appendChild(label);
+
+        if (fieldNode.tagName.toLowerCase() === 'img') {
+          // Image editing
+          const currentSrc = fieldNode.getAttribute('src') || '';
+          const imgBox = document.createElement('div');
+          imgBox.className = 'image-edit-box';
+          
+          const preview = document.createElement('img');
+          preview.className = 'image-preview';
+          preview.src = '/' + currentSrc;
+          preview.id = `preview-${listKey}-${index}-${fieldName}`;
+          imgBox.appendChild(preview);
+
+          const controls = document.createElement('div');
+          controls.className = 'image-controls';
+          
+          const select = document.createElement('select');
+          select.className = 'form-control';
+          select.style.fontSize = '12px';
+          select.id = `select-asset-${listKey}-${index}-${fieldName}`;
+          
+          const defaultOpt = document.createElement('option');
+          defaultOpt.value = currentSrc;
+          defaultOpt.textContent = `Текущо: ${currentSrc.replace('assets/', '')}`;
+          select.appendChild(defaultOpt);
+
+          libraryAssets.forEach(asset => {
+            if (asset !== currentSrc) {
+              const opt = document.createElement('option');
+              opt.value = asset;
+              opt.textContent = asset.replace('assets/', '');
+              select.appendChild(opt);
+            }
+          });
+          select.onchange = () => {
+            preview.src = '/' + select.value;
+          };
+          controls.appendChild(select);
+
+          // Upload direct button
+          const uploadLabel = document.createElement('label');
+          uploadLabel.className = 'btn-upload-label';
+          uploadLabel.textContent = 'Качи...';
+          
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.style.display = 'none';
+          fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            showLoading(true);
+            const reader = new FileReader();
+            reader.onload = (re) => {
+              fetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: file.name, base64: re.target.result })
+              })
+              .then(r => r.json())
+              .then(uploadData => {
+                showLoading(false);
+                if (uploadData.success) {
+                  showToast('Качено успешно!', 'success');
+                  const opt = document.createElement('option');
+                  opt.value = uploadData.url;
+                  opt.textContent = file.name;
+                  select.appendChild(opt);
+                  select.value = uploadData.url;
+                  preview.src = '/' + uploadData.url;
+                  
+                  fetchAssetsList();
+                } else {
+                  showToast(uploadData.error, 'danger');
+                }
+              }).catch(err => {
+                showLoading(false);
+                showToast(err.message, 'danger');
+              });
+            };
+            reader.readAsDataURL(file);
+          };
+          uploadLabel.appendChild(fileInput);
+          controls.appendChild(uploadLabel);
+
+          imgBox.appendChild(controls);
+          formGroup.appendChild(imgBox);
+        } else {
+          // Text input
+          const textVal = fieldNode.textContent.trim();
+          let input;
+          
+          if (textVal.length > 80 || fieldNode.innerHTML.includes('<br>')) {
+            input = document.createElement('textarea');
+            input.value = fieldNode.innerHTML.trim();
+            input.setAttribute('data-content-type', 'html');
+          } else {
+            input = document.createElement('input');
+            input.type = 'text';
+            input.value = textVal;
+            input.setAttribute('data-content-type', 'text');
+          }
+          input.className = 'form-control';
+          input.id = `input-${listKey}-${index}-${fieldName}`;
+          formGroup.appendChild(input);
+        }
+
+        fieldsGrid.appendChild(formGroup);
+      });
+
+      // Special handling: if list item has "wide" layout check box (specific for gallery / page blocks)
+      if (itemNode.classList.contains('gallery-item')) {
+        const isWide = itemNode.classList.contains('wide');
+        const formGroup = document.createElement('div');
+        formGroup.className = 'form-group';
+        formGroup.innerHTML = `
+          <label class="form-label">Размер в решетката</label>
+          <div style="display:flex; align-items:center; gap: 8px; margin-top: 10px;">
+            <input type="checkbox" id="layout-${listKey}-${index}-wide" ${isWide ? 'checked' : ''} style="width:18px; height:18px; cursor:pointer;">
+            <label for="layout-${listKey}-${index}-wide" style="cursor:pointer; font-size:14px;">Широк елемент (заема 2 колони)</label>
+          </div>
+        `;
+        fieldsGrid.appendChild(formGroup);
+      }
+
+      card.appendChild(fieldsGrid);
+
+      // Reordering & deletion controls
+      const controls = document.createElement('div');
+      controls.className = 'list-item-controls';
+      controls.innerHTML = `
+        <button type="button" class="btn-icon" title="Нагоре" onclick="moveListItem('${listKey}', ${index}, -1)">▲</button>
+        <button type="button" class="btn-icon" title="Надолу" onclick="moveListItem('${listKey}', ${index}, 1)">▼</button>
+        <button type="button" class="btn-icon delete" title="Изтрий" onclick="deleteListItem('${listKey}', ${index})">✕</button>
+      `;
+      card.appendChild(controls);
+
+      return card;
+    }
+
+    function addListItem(listKey, originalContainer) {
+      if (!parsedDocument) return;
+      const targetContainer = parsedDocument.querySelector(`[data-list="${listKey}"]`);
+      if (!targetContainer) return;
+
+      const items = targetContainer.querySelectorAll('[data-item]');
+      if (items.length === 0) {
+        showToast('Грешка: Не е намерен макет (template) за клониране в тази секция.', 'danger');
+        return;
+      }
+
+      // Clone the first item
+      const clone = items[0].cloneNode(true);
+      
+      // Clear text fields, reset image placeholders to a dummy or keep original
+      clone.querySelectorAll('[data-field]').forEach(field => {
+        if (field.tagName.toLowerCase() === 'img') {
+          // Keep template image or reset
+        } else {
+          field.textContent = 'Нов елемент съдържание';
+        }
+      });
+
+      // Append clone to document list container
+      targetContainer.appendChild(clone);
+      
+      // Regenerate Form fields in editor to include the new card
+      generateFieldsForm();
+      showToast('Добавен е нов елемент към списъка. Не забравяйте да попълните полетата и да натиснете "Запази промените".', 'success');
+      
+      // Scroll to bottom of fields to see the new item
+      setTimeout(() => {
+        const listContainer = document.getElementById(`list-items-${listKey}`);
+        if (listContainer) {
+          listContainer.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+
+    function deleteListItem(listKey, index) {
+      if (!confirm('Сигурни ли сте, че искате да изтриете този елемент?')) return;
+      
+      const targetContainer = parsedDocument.querySelector(`[data-list="${listKey}"]`);
+      const items = targetContainer.querySelectorAll('[data-item]');
+      if (items[index]) {
+        items[index].remove();
+        generateFieldsForm();
+        showToast('Елементът е премахнат временно от списъка.', 'success');
+      }
+    }
+
+    function moveListItem(listKey, index, direction) {
+      const targetContainer = parsedDocument.querySelector(`[data-list="${listKey}"]`);
+      const items = Array.from(targetContainer.querySelectorAll('[data-item]'));
+      const targetIndex = index + direction;
+      
+      if (targetIndex < 0 || targetIndex >= items.length) return; // boundary check
+
+      // Swap elements in parsed DOM
+      const itemToMove = items[index];
+      const targetItem = items[targetIndex];
+      
+      if (direction === -1) {
+        // move up: insert itemToMove before targetItem
+        targetContainer.insertBefore(itemToMove, targetItem);
+      } else {
+        // move down: insert itemToMove after targetItem
+        targetContainer.insertBefore(itemToMove, targetItem.nextSibling);
+      }
+
+      generateFieldsForm();
+      
+      // Focus on the newly positioned card
+      setTimeout(() => {
+        const listContainer = document.getElementById(`list-items-${listKey}`);
+        if (listContainer && listContainer.children[targetIndex]) {
+          listContainer.children[targetIndex].scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+
+    function savePage(e) {
+      e.preventDefault();
+      if (!parsedDocument || !currentLoadedPage) return;
+
+      showLoading(true);
+
+      try {
+        // 1. Update data-edit elements
+        parsedDocument.querySelectorAll('[data-edit]').forEach(el => {
+          const editKey = el.getAttribute('data-edit');
+          if (el.tagName.toLowerCase() === 'img') {
+            const selectVal = document.getElementById(`select-asset-${editKey}`).value;
+            el.setAttribute('src', selectVal);
+          } else {
+            const inputEl = document.getElementById(`input-${editKey}`);
+            const contentType = inputEl.getAttribute('data-content-type');
+            if (contentType === 'html') {
+              el.innerHTML = inputEl.value.trim();
+            } else {
+              el.textContent = inputEl.value.trim();
+            }
+          }
+        });
+
+        // 2. Update list items fields
+        parsedDocument.querySelectorAll('[data-list]').forEach(listContainer => {
+          const listKey = listContainer.getAttribute('data-list');
+          
+          // Skip gallery lists if handled elsewhere
+          if (listKey === 'gallery-main' || listKey === 'gallery-preview') return;
+
+          const items = listContainer.querySelectorAll('[data-item]');
+          items.forEach((itemNode, index) => {
+            
+            // Check wide layout class if checkbox exists
+            const wideCheckbox = document.getElementById(`layout-${listKey}-${index}-wide`);
+            if (wideCheckbox) {
+              if (wideCheckbox.checked) {
+                itemNode.classList.add('wide');
+              } else {
+                itemNode.classList.remove('wide');
+              }
+            }
+
+            // Update fields inside item
+            itemNode.querySelectorAll('[data-field]').forEach(fieldNode => {
+              const fieldName = fieldNode.getAttribute('data-field');
+              const inputId = `input-${listKey}-${index}-${fieldName}`;
+              const selectId = `select-asset-${listKey}-${index}-${fieldName}`;
+
+              if (fieldNode.tagName.toLowerCase() === 'img') {
+                const selectEl = document.getElementById(selectId);
+                if (selectEl) {
+                  fieldNode.setAttribute('src', selectEl.value);
+                }
+              } else {
+                const inputEl = document.getElementById(inputId);
+                if (inputEl) {
+                  const contentType = inputEl.getAttribute('data-content-type');
+                  if (contentType === 'html') {
+                    fieldNode.innerHTML = inputEl.value.trim();
+                  } else {
+                    fieldNode.textContent = inputEl.value.trim();
+                  }
+                }
+              }
+            });
+          });
+        });
+
+        // 3. Post back to API
+        const serializedHtml = '<!DOCTYPE html>\n' + parsedDocument.documentElement.outerHTML;
+        
+        fetch('/api/page', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: currentLoadedPage,
+            html: serializedHtml
+          })
+        })
+        .then(res => res.json())
+        .then(data => {
+          showLoading(false);
+          if (data.success) {
+            showToast('Страницата е записана успешно!', 'success');
+            // Reload fields to align DOM state
+            loadPageFields();
+          } else {
+            showToast('Грешка при запис: ' + data.error, 'danger');
+          }
+        }).catch(err => {
+          showLoading(false);
+          showToast('Сървърна грешка: ' + err.message, 'danger');
+        });
+
+      } catch (err) {
+        showLoading(false);
+        showToast('Грешка при подготовка на данните: ' + err.message, 'danger');
+      }
+    }
+
+    // --- GALLERY MANAGER LOGIC ---
+
+    let parsedGalleryDoc = null;
+    let galleryItemsList = [];
+
+    function loadGalleryItems() {
+      showLoading(true);
+      fetch('/api/page?name=gallery.html')
+        .then(res => res.text())
+        .then(html => {
+          showLoading(false);
+          parsedGalleryDoc = new DOMParser().parseFromString(html, 'text/html');
+          
+          const listContainer = parsedGalleryDoc.querySelector('[data-list="gallery-main"]');
+          if (!listContainer) {
+            showToast('Не е намерена галерия на gallery.html', 'danger');
+            return;
+          }
+
+          const items = listContainer.querySelectorAll('[data-item]');
+          galleryItemsList = [];
+
+          items.forEach(item => {
+            const imgEl = item.querySelector('[data-field="image"]');
+            const tagEl = item.querySelector('[data-field="tag"]');
+            const descEl = item.querySelector('[data-field="desc"]');
+            
+            galleryItemsList.push({
+              image: imgEl ? imgEl.getAttribute('src') : '',
+              tag: tagEl ? tagEl.textContent.trim() : 'Груб строеж',
+              desc: descEl ? descEl.textContent.trim() : '',
+              wide: item.classList.contains('wide')
+            });
+          });
+
+          renderGalleryItemsUI();
+        })
+        .catch(err => {
+          showLoading(false);
+          showToast('Грешка при зареждане на галерията: ' + err.message, 'danger');
+        });
+    }
+
+    function renderGalleryItemsUI() {
+      const container = document.getElementById('gallery-manager-list');
+      container.innerHTML = '';
+
+      if (galleryItemsList.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--text-muted); padding: 20px;">Галерията е празна.</div>';
+        return;
+      }
+
+      galleryItemsList.forEach((item, index) => {
+        const card = document.createElement('div');
+        card.className = 'list-item-card';
+        
+        const grid = document.createElement('div');
+        grid.className = 'grid-2';
+
+        // Image Field
+        const imgGroup = document.createElement('div');
+        imgGroup.className = 'form-group';
+        imgGroup.innerHTML = `<label class="form-label">Изображение (снимка #${index+1})</label>`;
+        
+        const imgBox = document.createElement('div');
+        imgBox.className = 'image-edit-box';
+        
+        const preview = document.createElement('img');
+        preview.className = 'image-preview';
+        preview.src = '/' + item.image;
+        preview.id = `gallery-preview-${index}`;
+        imgBox.appendChild(preview);
+
+        const controls = document.createElement('div');
+        controls.className = 'image-controls';
+        
+        const select = document.createElement('select');
+        select.className = 'form-control';
+        select.style.fontSize = '12px';
+        select.id = `gallery-select-${index}`;
+        
+        const defaultOpt = document.createElement('option');
+        defaultOpt.value = item.image;
+        defaultOpt.textContent = `Текущо: ${item.image.replace('assets/', '')}`;
+        select.appendChild(defaultOpt);
+
+        libraryAssets.forEach(asset => {
+          if (asset !== item.image) {
+            const opt = document.createElement('option');
+            opt.value = asset;
+            opt.textContent = asset.replace('assets/', '');
+            select.appendChild(opt);
+          }
+        });
+        select.onchange = () => {
+          preview.src = '/' + select.value;
+          galleryItemsList[index].image = select.value;
+        };
+        controls.appendChild(select);
+
+        // Direct upload button inside gallery item
+        const uploadLabel = document.createElement('label');
+        uploadLabel.className = 'btn-upload-label';
+        uploadLabel.textContent = 'Качи нова...';
+        
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        fileInput.onchange = (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          showLoading(true);
+          const reader = new FileReader();
+          reader.onload = (re) => {
+            fetch('/api/upload', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ filename: file.name, base64: re.target.result })
+            })
+            .then(r => r.json())
+            .then(uploadData => {
+              showLoading(true); // stay loading while we reload library
+              if (uploadData.success) {
+                showToast('Качено успешно!', 'success');
+                // Refresh libraries
+                fetchAssetsList().then(() => {
+                  showLoading(false);
+                  const opt = document.createElement('option');
+                  opt.value = uploadData.url;
+                  opt.textContent = file.name;
+                  select.appendChild(opt);
+                  select.value = uploadData.url;
+                  preview.src = '/' + uploadData.url;
+                  galleryItemsList[index].image = uploadData.url;
+                });
+              } else {
+                showLoading(false);
+                showToast(uploadData.error, 'danger');
+              }
+            }).catch(err => {
+              showLoading(false);
+              showToast(err.message, 'danger');
+            });
+          };
+          reader.readAsDataURL(file);
+        };
+        uploadLabel.appendChild(fileInput);
+        controls.appendChild(uploadLabel);
+
+        imgBox.appendChild(controls);
+        imgGroup.appendChild(imgBox);
+        grid.appendChild(imgGroup);
+
+        // Details grid column
+        const detailsGroup = document.createElement('div');
+        detailsGroup.className = 'form-group';
+        detailsGroup.innerHTML = `
+          <div style="margin-bottom: 12px;">
+            <label class="form-label" for="gallery-tag-${index}">Категория / Етикет (tag)</label>
+            <select class="form-control" id="gallery-tag-${index}" onchange="updateGalleryItemProp(${index}, 'tag', this.value)">
+              <option value="Груб строеж" ${item.tag === 'Груб строеж' ? 'selected' : ''}>Груб строеж</option>
+              <option value="Довършителни" ${item.tag === 'Довършителни' ? 'selected' : ''}>Довършителни</option>
+              <option value="До ключ" ${item.tag === 'До ключ' ? 'selected' : ''}>До ключ</option>
+              <option value="Екипът ни" ${item.tag === 'Екипът ни' ? 'selected' : ''}>Екипът ни</option>
+            </select>
+          </div>
+          <div style="margin-bottom: 12px;">
+            <label class="form-label" for="gallery-desc-${index}">Кратко описание</label>
+            <input class="form-control" type="text" id="gallery-desc-${index}" value="${item.desc}" onchange="updateGalleryItemProp(${index}, 'desc', this.value)" placeholder="Напр. Изграждане на покривна конструкция">
+          </div>
+          <div style="display:flex; align-items:center; gap: 8px;">
+            <input type="checkbox" id="gallery-wide-${index}" ${item.wide ? 'checked' : ''} onchange="updateGalleryItemProp(${index}, 'wide', this.checked)" style="width:16px; height:16px; cursor:pointer;">
+            <label for="gallery-wide-${index}" style="cursor:pointer; font-size:13px; color: var(--text-muted);">Широк размер (заема 2 колони в решетката)</label>
+          </div>
+        `;
+        grid.appendChild(detailsGroup);
+
+        card.appendChild(grid);
+
+        // Card controls
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'list-item-controls';
+        controlsDiv.innerHTML = `
+          <button type="button" class="btn-icon" title="Нагоре" onclick="moveGalleryItem(${index}, -1)">▲</button>
+          <button type="button" class="btn-icon" title="Надолу" onclick="moveGalleryItem(${index}, 1)">▼</button>
+          <button type="button" class="btn-icon delete" title="Изтрий" onclick="deleteGalleryItem(${index})">✕</button>
+        `;
+        card.appendChild(controlsDiv);
+
+        container.appendChild(card);
+      });
+    }
+
+    function updateGalleryItemProp(idx, prop, val) {
+      if (galleryItemsList[idx]) {
+        galleryItemsList[idx][prop] = val;
+      }
+    }
+
+    function moveGalleryItem(index, direction) {
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= galleryItemsList.length) return;
+      
+      // Swap
+      const temp = galleryItemsList[index];
+      galleryItemsList[index] = galleryItemsList[targetIndex];
+      galleryItemsList[targetIndex] = temp;
+
+      renderGalleryItemsUI();
+    }
+
+    function deleteGalleryItem(index) {
+      if (!confirm('Сигурни ли сте, че искате да премахнете това изображение от галерията?')) return;
+      galleryItemsList.splice(index, 1);
+      renderGalleryItemsUI();
+    }
+
+    function addGalleryItem() {
+      // Find a default image if library has any
+      const defaultImg = libraryAssets.length > 0 ? libraryAssets[0] : 'assets/service-rough.png';
+      galleryItemsList.push({
+        image: defaultImg,
+        tag: 'Груб строеж',
+        desc: 'Нов завършен строителен проект',
+        wide: false
+      });
+      renderGalleryItemsUI();
+      
+      // Scroll to bottom
+      setTimeout(() => {
+        const container = document.getElementById('gallery-manager-list');
+        if (container.lastElementChild) {
+          container.lastElementChild.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 100);
+    }
+
+    async function saveGalleryData() {
+      if (galleryItemsList.length === 0) {
+        showToast('Галерията не може да бъде празна!', 'danger');
+        return;
+      }
+
+      showLoading(true);
+
+      try {
+        // --- STEP 1: Update gallery.html (The main gallery grid) ---
+        const galleryRes = await fetch('/api/page?name=gallery.html');
+        const galleryHtml = await galleryRes.text();
+        const galleryDoc = new DOMParser().parseFromString(galleryHtml, 'text/html');
+
+        const mainListContainer = galleryDoc.querySelector('[data-list="gallery-main"]');
+        if (!mainListContainer) {
+          throw new Error('Не е намерен data-list="gallery-main" в gallery.html');
+        }
+
+        // Get template node to reconstruct elements correctly
+        const mainItems = mainListContainer.querySelectorAll('[data-item]');
+        const templateNode = mainItems.length > 0 ? mainItems[0].cloneNode(true) : null;
+        
+        if (!templateNode) {
+          throw new Error('Не е намерен макет за елемент на галерията в gallery.html');
+        }
+
+        // Clear list container
+        mainListContainer.innerHTML = '';
+
+        galleryItemsList.forEach(item => {
+          const itemNode = templateNode.cloneNode(true);
+          
+          // Apply class wide
+          if (item.wide) {
+            itemNode.className = 'gallery-item wide';
+          } else {
+            itemNode.className = 'gallery-item';
+          }
+          itemNode.setAttribute('data-item', '');
+
+          const imgEl = itemNode.querySelector('[data-field="image"]');
+          const tagEl = itemNode.querySelector('[data-field="tag"]');
+          const descEl = itemNode.querySelector('[data-field="desc"]');
+
+          if (imgEl) {
+            imgEl.setAttribute('src', item.image);
+            imgEl.setAttribute('alt', item.desc || item.tag);
+          }
+          if (tagEl) tagEl.textContent = item.tag;
+          if (descEl) descEl.textContent = item.desc;
+
+          mainListContainer.appendChild(itemNode);
+        });
+
+        // Save gallery.html
+        const serializedGallery = '<!DOCTYPE html>\n' + galleryDoc.documentElement.outerHTML;
+        await fetch('/api/page', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: 'gallery.html', html: serializedGallery })
+        });
+
+
+        // --- STEP 2: Update index.html (Homepage preview gallery - first 4 elements) ---
+        const indexRes = await fetch('/api/page?name=index.html');
+        const indexHtml = await indexRes.text();
+        const indexDoc = new DOMParser().parseFromString(indexHtml, 'text/html');
+
+        const previewListContainer = indexDoc.querySelector('[data-list="gallery-preview"]');
+        if (previewListContainer) {
+          const previewItems = previewListContainer.querySelectorAll('[data-item]');
+          const previewTemplate = previewItems.length > 0 ? previewItems[0].cloneNode(true) : null;
+
+          if (previewTemplate) {
+            previewListContainer.innerHTML = '';
+            
+            // Limit preview to first 4 elements in gallery
+            const previewData = galleryItemsList.slice(0, 4);
+            
+            previewData.forEach(item => {
+              const itemNode = previewTemplate.cloneNode(true);
+              
+              if (item.wide) {
+                itemNode.className = 'gallery-item wide';
+              } else {
+                itemNode.className = 'gallery-item';
+              }
+              itemNode.setAttribute('data-item', '');
+
+              const imgEl = itemNode.querySelector('[data-field="image"]');
+              const tagEl = itemNode.querySelector('[data-field="tag"]');
+              const descEl = itemNode.querySelector('[data-field="desc"]');
+
+              if (imgEl) {
+                imgEl.setAttribute('src', item.image);
+                imgEl.setAttribute('alt', item.desc || item.tag);
+              }
+              if (tagEl) tagEl.textContent = item.tag;
+              if (descEl) descEl.textContent = item.desc;
+
+              previewListContainer.appendChild(itemNode);
+            });
+
+            // Save index.html
+            const serializedIndex = '<!DOCTYPE html>\n' + indexDoc.documentElement.outerHTML;
+            await fetch('/api/page', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: 'index.html', html: serializedIndex })
+            });
+          }
+        }
+
+        showLoading(false);
+        showToast('Галерията е записана успешно и синхронизирана със заглавната страница!', 'success');
+        
+        // Reload gallery items
+        loadGalleryItems();
+      } catch (err) {
+        showLoading(false);
+        showToast('Грешка при записване на галерията: ' + err.message, 'danger');
+      }
+    }
+
+
+    // --- DICTIONARY HELPER FOR PREMIUM LABELS ---
+
+    function getFriendlyLabel(key) {
+      const labels = {
+        'meta-title': 'Meta Заглавие на страницата (Title)',
+        'meta-description': 'Meta Описание на страницата (Description)',
+        'hero-eyebrow': 'Надзаглавие (Hero Eyebrow)',
+        'hero-title': 'Главна хедлайн титла (Hero Title)',
+        'hero-desc': 'Подзаглавие / Параграф (Hero Description)',
+        'hero-btn-text': 'Бутон за действие 1',
+        'hero-image': 'Главна Hero снимка',
+        'hero-rating-stars': 'Оценка Звездички (напр. ★★★★★)',
+        'hero-rating-score': 'Оценка Текст (напр. 5.0 Оценка)',
+        'hero-rating-count': 'Оценка Брой (напр. 16 отзива)',
+        'services-title': 'Заглавие на Услугите',
+        'services-desc': 'Описание под заглавието на Услугите',
+        'why-image': 'Изображение "Защо да изберете нас"',
+        'why-eyebrow': 'Надзаглавие "Защо да изберете нас"',
+        'why-title': 'Заглавие "Защо да изберете нас"',
+        'why-desc': 'Параграф "Защо да изберете нас"',
+        'how-eyebrow': 'Надзаглавие "Как работим"',
+        'how-title': 'Заглавие "Как работим"',
+        'how-desc': 'Параграф "Как работим"',
+        'locations-eyebrow': 'Надзаглавие Локация',
+        'locations-title': 'Заглавие Локация',
+        'locations-desc': 'Параграф Локация',
+        'locations-image': 'Снимка Локация',
+        'gallery-title': 'Заглавие на Галерията',
+        'gallery-desc': 'Описание на Галерията',
+        'cta-eyebrow': 'Надзаглавие банер (CTA Eyebrow)',
+        'cta-title': 'Заглавие на банера (CTA Title)',
+        'cta-btn-text': 'Текст на бутона в банера',
+        'footer-about-text': 'Описание на фирмата във футера',
+        'story-eyebrow': 'Надзаглавие "Нашата история"',
+        'story-title': 'Заглавие "Нашата история"',
+        'story-image': 'Снимка "Нашата история"',
+        'values-eyebrow': 'Надзаглавие "Нашите ценности"',
+        'values-title': 'Заглавие "Нашите ценности"',
+        'values-desc': 'Параграф "Нашите ценности"',
+        'details-title': 'Заглавие "За услугата"',
+        'details-desc': 'Описание на услугата',
+        'details-image': 'Главна снимка на услугата',
+        'advantages-title': 'Заглавие "Нашите предимства"',
+        'advantages-btn-text': 'Бутон "Предимства"',
+        'working-hours': 'Работно време',
+        'form-title': 'Заглавие на формата за контакт',
+        'form-btn-text': 'Текст на изпращащия бутон',
+
+        // Lists field names
+        'text': 'Текстов елемент / Булет',
+        'title': 'Заглавие',
+        'desc': 'Описание',
+        'image': 'Изображение',
+        'num': 'Пореден номер',
+        'link-text': 'Текст на линка / бутон',
+        'name': 'Име на локация / район',
+        'label': 'Етикет / Описание на статистиката'
+      };
+      return labels[key] || key;
+    }
+
+    function getFriendlyListLabel(key) {
+      const labels = {
+        'hero-badges': 'Баджове в Hero секцията',
+        'services': 'Списък с карти на Услугите',
+        'why-features': 'Предимства (булети с отметки) - Секция Начало',
+        'how-steps': 'Стъпки в процеса "Как работим"',
+        'locations': 'Обслужвани райони (локационни чипове)',
+        'story-paragraphs': 'Параграфи в "Нашата история"',
+        'story-stats': 'Кутии със статистика (Stats)',
+        'values': 'Списък с карти на Ценностите',
+        'service-steps': 'Стъпки при изпълнение на услугата',
+        'advantages': 'Предимства в страничната лента на Услугата'
+      };
+      return labels[key] || key;
+    }
+  </script>
+</body>
+</html>
