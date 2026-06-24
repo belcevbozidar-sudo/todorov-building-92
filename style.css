@@ -408,8 +408,8 @@ h1, h2, h3 {
 
 .hero-rating {
   position: absolute;
-  left: 24px;
-  bottom: 24px;
+  right: 24px;
+  top: 24px;
   z-index: 2;
   background: rgba(10,10,10,0.7);
   backdrop-filter: blur(6px);
