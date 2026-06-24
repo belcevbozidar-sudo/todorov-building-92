@@ -630,6 +630,108 @@
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
     }
+
+    /* --- CONNECTION ERROR --- */
+    #connection-error {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: radial-gradient(circle at center, #1e293b 0%, #0b0f19 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 10000;
+      transition: var(--transition);
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #connection-error.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .error-card {
+      background: var(--panel-dark);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 20px;
+      padding: 40px;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+      animation: fadeInUp 0.6s ease;
+    }
+
+    .error-icon {
+      font-size: 48px;
+      color: #ef4444;
+      margin-bottom: 20px;
+    }
+
+    .error-card h2 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 24px;
+      color: #ffffff;
+      margin-bottom: 15px;
+    }
+
+    .error-card p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+    }
+
+    .error-instructions {
+      text-align: left;
+      background: rgba(0, 0, 0, 0.2);
+      border-radius: 8px;
+      padding: 15px;
+      margin-bottom: 20px;
+      font-family: monospace;
+      font-size: 13px;
+      color: #e2e8f0;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .error-instructions ol {
+      margin: 0;
+      padding-left: 20px;
+    }
+
+    .error-instructions li {
+      margin-bottom: 5px;
+    }
+
+    .error-instructions code {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--gold);
+    }
+
+    .btn-retry {
+      background: var(--gold);
+      color: var(--bg-dark);
+      border: none;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-family: 'Outfit', sans-serif;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      width: 100%;
+      margin-bottom: 10px;
+    }
+
+    .btn-retry:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(212, 175, 55, 0.3);
+    }
   </style>
 </head>
 <body>
@@ -637,6 +739,32 @@
   <!-- LOADING OVERLAY -->
   <div id="loading" class="loading-overlay">
     <div class="spinner"></div>
+  </div>
+
+  <!-- CONNECTION ERROR SCREEN -->
+  <div id="connection-error">
+    <div class="error-card">
+      <div class="error-icon">⚠️</div>
+      <h2>Локалният сървър не е стартиран!</h2>
+      <p>Сайтът е хостван статично. За да работи административният панел, е необходимо да работи локалният спомагателен сървър на Вашия компютър.</p>
+      
+      <div class="error-instructions">
+        <strong>Инструкции за стартиране:</strong>
+        <ol>
+          <li>Отворете терминал в папката на проекта (<code>t-build92</code>).</li>
+          <li>Стартирайте сървъра с командата:<br><code style="display:block; margin: 5px 0; padding: 5px; background: rgba(255,255,255,0.05); text-align:center;">node server.js</code></li>
+          <li>Уверете се, че виждате съобщението за успешна връзка.</li>
+        </ol>
+      </div>
+
+      <button class="btn-retry" onclick="retryConnection()">🔄 Повторен опит</button>
+      
+      <div style="margin-top: 15px; font-size: 12px; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px;">
+        <strong>Забележка за Mixed Content (Сигурност):</strong><br>
+        Ако сте отворили сайта през HTTPS (Vercel), браузърът може да блокира връзката. Препоръчваме да отворите панела директно от локалния адрес:
+        <a href="http://localhost:3000/admin" style="color: var(--gold); text-decoration: none; display: block; margin-top: 5px; font-weight: bold;">👉 http://localhost:3000/admin</a>
+      </div>
+    </div>
   </div>
 
   <!-- TOAST NOTIFICATION CONTAINER -->
@@ -850,6 +978,45 @@
     let parsedDocument = null;
     let libraryAssets = [];
 
+    // Dynamic Backend base detection (cross-origin / local development helper)
+    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '3000'
+      ? ''
+      : 'http://localhost:3000';
+
+    // API fetch wrapper with global error interceptors for connection issues
+    function apiFetch(endpoint, options = {}) {
+      const url = endpoint.startsWith('http') ? endpoint : `${API_BASE}${endpoint}`;
+      return fetch(url, options)
+        .then(res => {
+          if (!res.ok) {
+            return res.text().then(text => {
+              throw new Error(text || `HTTP error! status: ${res.status}`);
+            });
+          }
+          return res;
+        })
+        .catch(err => {
+          console.error('API Fetch failed:', err);
+          showConnectionError(true);
+          throw err;
+        });
+    }
+
+    function showConnectionError(active) {
+      const overlay = document.getElementById('connection-error');
+      if (active) {
+        overlay.classList.add('active');
+        showLoading(false);
+      } else {
+        overlay.classList.remove('active');
+      }
+    }
+
+    function retryConnection() {
+      showConnectionError(false);
+      initDashboard();
+    }
+
     // Initialize Page
     document.addEventListener('DOMContentLoaded', () => {
       // Check if logged in in localStorage (mock authentication)
@@ -950,7 +1117,7 @@
     // --- API CALLS ---
 
     function fetchPagesList() {
-      return fetch('/api/pages')
+      return apiFetch('/api/pages')
         .then(res => res.json())
         .then(data => {
           pagesList = data;
@@ -969,7 +1136,7 @@
     }
 
     function fetchAssetsList() {
-      return fetch('/api/assets')
+      return apiFetch('/api/assets')
         .then(res => res.json())
         .then(data => {
           libraryAssets = data;
@@ -1015,7 +1182,7 @@
         return;
       }
       showLoading(true);
-      fetch(`/api/asset?name=${assetName}`, { method: 'DELETE' })
+      apiFetch(`/api/asset?name=${assetName}`, { method: 'DELETE' })
         .then(res => res.json())
         .then(data => {
           showLoading(false);
@@ -1041,7 +1208,7 @@
       showLoading(true);
       reader.onload = function(e) {
         const base64 = e.target.result;
-        fetch('/api/upload', {
+        apiFetch('/api/upload', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1072,7 +1239,7 @@
     function loadGlobalsFromFiles() {
       // Load current globals from index.html
       showLoading(true);
-      fetch('/api/page?name=index.html')
+      apiFetch('/api/page?name=index.html')
         .then(res => res.text())
         .then(html => {
           showLoading(false);
@@ -1109,7 +1276,7 @@
       try {
         // Iterate through all HTML files and update their globals
         for (const pageName of pagesList) {
-          const res = await fetch(`/api/page?name=${pageName}`);
+          const res = await apiFetch(`/api/page?name=${pageName}`);
           const htmlText = await res.text();
           const doc = new DOMParser().parseFromString(htmlText, 'text/html');
           let changed = false;
@@ -1167,7 +1334,7 @@
           // Save page if there were changes
           if (changed) {
             const serializedHtml = '<!DOCTYPE html>\n' + doc.documentElement.outerHTML;
-            await fetch('/api/page', {
+            await apiFetch('/api/page', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ name: pageName, html: serializedHtml })
@@ -1193,7 +1360,7 @@
       document.getElementById('page-edit-heading').textContent = `Редакция на: ${getFriendlyPageName(filename)}`;
 
       showLoading(true);
-      fetch(`/api/page?name=${filename}`)
+      apiFetch(`/api/page?name=${filename}`)
         .then(res => res.text())
         .then(html => {
           showLoading(false);
@@ -1295,7 +1462,7 @@
               showLoading(true);
               const reader = new FileReader();
               reader.onload = (re) => {
-                fetch('/api/upload', {
+                apiFetch('/api/upload', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ filename: file.name, base64: re.target.result })
@@ -1475,7 +1642,7 @@
             showLoading(true);
             const reader = new FileReader();
             reader.onload = (re) => {
-              fetch('/api/upload', {
+              apiFetch('/api/upload', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ filename: file.name, base64: re.target.result })
@@ -1715,7 +1882,7 @@
         // 3. Post back to API
         const serializedHtml = '<!DOCTYPE html>\n' + parsedDocument.documentElement.outerHTML;
         
-        fetch('/api/page', {
+        apiFetch('/api/page', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -1751,7 +1918,7 @@
 
     function loadGalleryItems() {
       showLoading(true);
-      fetch('/api/page?name=gallery.html')
+      apiFetch('/api/page?name=gallery.html')
         .then(res => res.text())
         .then(html => {
           showLoading(false);
@@ -1859,7 +2026,7 @@
           showLoading(true);
           const reader = new FileReader();
           reader.onload = (re) => {
-            fetch('/api/upload', {
+            apiFetch('/api/upload', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ filename: file.name, base64: re.target.result })
@@ -1992,7 +2159,7 @@
 
       try {
         // --- STEP 1: Update gallery.html (The main gallery grid) ---
-        const galleryRes = await fetch('/api/page?name=gallery.html');
+        const galleryRes = await apiFetch('/api/page?name=gallery.html');
         const galleryHtml = await galleryRes.text();
         const galleryDoc = new DOMParser().parseFromString(galleryHtml, 'text/html');
 
@@ -2039,7 +2206,7 @@
 
         // Save gallery.html
         const serializedGallery = '<!DOCTYPE html>\n' + galleryDoc.documentElement.outerHTML;
-        await fetch('/api/page', {
+        await apiFetch('/api/page', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ name: 'gallery.html', html: serializedGallery })
@@ -2047,7 +2214,7 @@
 
 
         // --- STEP 2: Update index.html (Homepage preview gallery - first 4 elements) ---
-        const indexRes = await fetch('/api/page?name=index.html');
+        const indexRes = await apiFetch('/api/page?name=index.html');
         const indexHtml = await indexRes.text();
         const indexDoc = new DOMParser().parseFromString(indexHtml, 'text/html');
 
@@ -2088,7 +2255,7 @@
 
             // Save index.html
             const serializedIndex = '<!DOCTYPE html>\n' + indexDoc.documentElement.outerHTML;
-            await fetch('/api/page', {
+            await apiFetch('/api/page', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ name: 'index.html', html: serializedIndex })
