@@ -979,9 +979,11 @@
     let libraryAssets = [];
 
     // Dynamic Backend base detection (cross-origin / local development helper)
-    const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') && window.location.port === '3000'
-      ? ''
-      : 'http://localhost:3000';
+    const isLocalServerOrProd = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+      ? (window.location.port === '3000')
+      : true;
+
+    const API_BASE = isLocalServerOrProd ? '' : 'http://localhost:3000';
 
     // API fetch wrapper with global error interceptors for connection issues
     function apiFetch(endpoint, options = {}) {
@@ -990,14 +992,23 @@
         .then(res => {
           if (!res.ok) {
             return res.text().then(text => {
-              throw new Error(text || `HTTP error! status: ${res.status}`);
+              let errorMsg = text;
+              try {
+                const parsed = JSON.parse(text);
+                if (parsed && parsed.error) errorMsg = parsed.error;
+              } catch(e) {}
+              throw new Error(errorMsg || `HTTP error! status: ${res.status}`);
             });
           }
           return res;
         })
         .catch(err => {
           console.error('API Fetch failed:', err);
-          showConnectionError(true);
+          if (url.includes('localhost:') || url.includes('127.0.0.1:')) {
+            showConnectionError(true);
+          } else {
+            showToast('Грешка при връзка с Vercel API: ' + err.message, 'danger');
+          }
           throw err;
         });
     }
