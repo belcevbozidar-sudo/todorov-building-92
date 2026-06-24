@@ -122,35 +122,11 @@ h1, h2, h3 {
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
 }
 
-.brand-roof { width: 46px; height: 34px; flex-shrink: 0; }
-
-.brand-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
-}
-
-.brand-name {
-  font-family: 'Inter', sans-serif;
-  font-weight: 800;
-  font-size: 19px;
-  letter-spacing: 0.5px;
-  color: #fff;
-}
-
-.brand-sub {
-  font-family: 'Inter', sans-serif;
-  font-style: italic;
-  font-weight: 500;
-  font-size: 13px;
-  background: var(--gold-grad);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  margin-top: 1px;
+.brand-logo-img {
+  height: 56px;
+  width: auto;
 }
 
 .main-nav {
