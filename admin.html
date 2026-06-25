@@ -1945,12 +1945,29 @@
           galleryItemsList = [];
 
           items.forEach(item => {
-            const imgEl = item.querySelector('[data-field="image"]');
+            const splitContainer = item.querySelector('.split-images');
+            let isSplit = false;
+            let image = '';
+            let imageBefore = '';
+            
+            if (splitContainer) {
+              isSplit = true;
+              const imgBeforeEl = splitContainer.querySelector('[data-field="image-before"]');
+              const imgAfterEl = splitContainer.querySelector('[data-field="image-after"]');
+              imageBefore = imgBeforeEl ? imgBeforeEl.getAttribute('src') : '';
+              image = imgAfterEl ? imgAfterEl.getAttribute('src') : '';
+            } else {
+              const imgEl = item.querySelector('[data-field="image"]');
+              image = imgEl ? imgEl.getAttribute('src') : '';
+            }
+
             const tagEl = item.querySelector('[data-field="tag"]');
             const descEl = item.querySelector('[data-field="desc"]');
             
             galleryItemsList.push({
-              image: imgEl ? imgEl.getAttribute('src') : '',
+              image: image,
+              imageBefore: imageBefore,
+              isSplit: isSplit,
               tag: tagEl ? tagEl.textContent.trim() : 'Груб строеж',
               desc: descEl ? descEl.textContent.trim() : '',
               wide: item.classList.contains('wide')
@@ -1981,99 +1998,214 @@
         const grid = document.createElement('div');
         grid.className = 'grid-2';
 
-        // Image Field
+        // Image Field(s)
         const imgGroup = document.createElement('div');
         imgGroup.className = 'form-group';
-        imgGroup.innerHTML = `<label class="form-label">Изображение (снимка #${index+1})</label>`;
         
-        const imgBox = document.createElement('div');
-        imgBox.className = 'image-edit-box';
-        
-        const preview = document.createElement('img');
-        preview.className = 'image-preview';
-        preview.src = '/' + item.image;
-        preview.id = `gallery-preview-${index}`;
-        imgBox.appendChild(preview);
-
-        const controls = document.createElement('div');
-        controls.className = 'image-controls';
-        
-        const select = document.createElement('select');
-        select.className = 'form-control';
-        select.style.fontSize = '12px';
-        select.id = `gallery-select-${index}`;
-        
-        const defaultOpt = document.createElement('option');
-        defaultOpt.value = item.image;
-        defaultOpt.textContent = `Текущо: ${item.image.replace('assets/', '')}`;
-        select.appendChild(defaultOpt);
-
-        libraryAssets.forEach(asset => {
-          if (asset !== item.image) {
-            const opt = document.createElement('option');
-            opt.value = asset;
-            opt.textContent = asset.replace('assets/', '');
-            select.appendChild(opt);
-          }
-        });
-        select.onchange = () => {
-          preview.src = '/' + select.value;
-          galleryItemsList[index].image = select.value;
-        };
-        controls.appendChild(select);
-
-        // Direct upload button inside gallery item
-        const uploadLabel = document.createElement('label');
-        uploadLabel.className = 'btn-upload-label';
-        uploadLabel.textContent = 'Качи нова...';
-        
-        const fileInput = document.createElement('input');
-        fileInput.type = 'file';
-        fileInput.accept = 'image/*';
-        fileInput.style.display = 'none';
-        fileInput.onchange = (e) => {
-          const file = e.target.files[0];
-          if (!file) return;
-          showLoading(true);
-          const reader = new FileReader();
-          reader.onload = (re) => {
-            apiFetch('/api/upload', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ filename: file.name, base64: re.target.result })
-            })
-            .then(r => r.json())
-            .then(uploadData => {
-              showLoading(true); // stay loading while we reload library
-              if (uploadData.success) {
-                showToast('Качено успешно!', 'success');
-                // Refresh libraries
-                fetchAssetsList().then(() => {
-                  showLoading(false);
-                  const opt = document.createElement('option');
-                  opt.value = uploadData.url;
-                  opt.textContent = file.name;
-                  select.appendChild(opt);
-                  select.value = uploadData.url;
-                  preview.src = '/' + uploadData.url;
-                  galleryItemsList[index].image = uploadData.url;
-                });
-              } else {
-                showLoading(false);
-                showToast(uploadData.error, 'danger');
+        if (item.isSplit) {
+          imgGroup.innerHTML = `<label class="form-label">Снимки Преди / След (снимка #${index+1})</label>`;
+          
+          const splitContainer = document.createElement('div');
+          splitContainer.style.display = 'grid';
+          splitContainer.style.gridTemplateColumns = '1fr 1fr';
+          splitContainer.style.gap = '10px';
+          
+          const createImgBox = (label, imgProp, previewId, selectId) => {
+            const box = document.createElement('div');
+            box.className = 'image-edit-box';
+            box.style.padding = '8px';
+            
+            const lbl = document.createElement('div');
+            lbl.style.fontSize = '11px';
+            lbl.style.color = 'var(--text-muted)';
+            lbl.style.marginBottom = '5px';
+            lbl.textContent = label;
+            box.appendChild(lbl);
+            
+            const preview = document.createElement('img');
+            preview.className = 'image-preview';
+            preview.style.height = '70px';
+            const imgVal = item[imgProp] || 'assets/service-rough.png';
+            preview.src = '/' + imgVal;
+            preview.id = previewId;
+            box.appendChild(preview);
+            
+            const controls = document.createElement('div');
+            controls.className = 'image-controls';
+            controls.style.marginTop = '8px';
+            
+            const select = document.createElement('select');
+            select.className = 'form-control';
+            select.style.fontSize = '11px';
+            select.style.padding = '4px';
+            select.id = selectId;
+            
+            const defaultOpt = document.createElement('option');
+            defaultOpt.value = imgVal;
+            defaultOpt.textContent = `Текущо: ${imgVal.replace('assets/', '')}`;
+            select.appendChild(defaultOpt);
+            
+            libraryAssets.forEach(asset => {
+              if (asset !== imgVal) {
+                const opt = document.createElement('option');
+                opt.value = asset;
+                opt.textContent = asset.replace('assets/', '');
+                select.appendChild(opt);
               }
-            }).catch(err => {
-              showLoading(false);
-              showToast(err.message, 'danger');
             });
+            select.onchange = () => {
+              preview.src = '/' + select.value;
+              galleryItemsList[index][imgProp] = select.value;
+            };
+            controls.appendChild(select);
+            
+            const uploadLabel = document.createElement('label');
+            uploadLabel.className = 'btn-upload-label';
+            uploadLabel.style.padding = '4px 8px';
+            uploadLabel.style.fontSize = '10px';
+            uploadLabel.textContent = 'Качи...';
+            
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            fileInput.onchange = (e) => {
+              const file = e.target.files[0];
+              if (!file) return;
+              showLoading(true);
+              const reader = new FileReader();
+              reader.onload = (re) => {
+                apiFetch('/api/upload', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ filename: file.name, base64: re.target.result })
+                })
+                .then(r => r.json())
+                .then(uploadData => {
+                  showLoading(true);
+                  if (uploadData.success) {
+                    showToast('Качено успешно!', 'success');
+                    fetchAssetsList().then(() => {
+                      showLoading(false);
+                      const opt = document.createElement('option');
+                      opt.value = uploadData.url;
+                      opt.textContent = file.name;
+                      select.appendChild(opt);
+                      select.value = uploadData.url;
+                      preview.src = '/' + uploadData.url;
+                      galleryItemsList[index][imgProp] = uploadData.url;
+                    });
+                  } else {
+                    showLoading(false);
+                    showToast(uploadData.error, 'danger');
+                  }
+                }).catch(err => {
+                  showLoading(false);
+                  showToast(err.message, 'danger');
+                });
+              };
+              reader.readAsDataURL(file);
+            };
+            uploadLabel.appendChild(fileInput);
+            controls.appendChild(uploadLabel);
+            
+            box.appendChild(controls);
+            return box;
           };
-          reader.readAsDataURL(file);
-        };
-        uploadLabel.appendChild(fileInput);
-        controls.appendChild(uploadLabel);
+          
+          splitContainer.appendChild(createImgBox('Преди:', 'imageBefore', `gallery-preview-before-${index}`, `gallery-select-before-${index}`));
+          splitContainer.appendChild(createImgBox('След:', 'image', `gallery-preview-after-${index}`, `gallery-select-after-${index}`));
+          imgGroup.appendChild(splitContainer);
+        } else {
+          imgGroup.innerHTML = `<label class="form-label">Изображение (снимка #${index+1})</label>`;
+          
+          const imgBox = document.createElement('div');
+          imgBox.className = 'image-edit-box';
+          
+          const preview = document.createElement('img');
+          preview.className = 'image-preview';
+          preview.src = '/' + item.image;
+          preview.id = `gallery-preview-${index}`;
+          imgBox.appendChild(preview);
 
-        imgBox.appendChild(controls);
-        imgGroup.appendChild(imgBox);
+          const controls = document.createElement('div');
+          controls.className = 'image-controls';
+          
+          const select = document.createElement('select');
+          select.className = 'form-control';
+          select.style.fontSize = '12px';
+          select.id = `gallery-select-${index}`;
+          
+          const defaultOpt = document.createElement('option');
+          defaultOpt.value = item.image;
+          defaultOpt.textContent = `Текущо: ${item.image.replace('assets/', '')}`;
+          select.appendChild(defaultOpt);
+
+          libraryAssets.forEach(asset => {
+            if (asset !== item.image) {
+              const opt = document.createElement('option');
+              opt.value = asset;
+              opt.textContent = asset.replace('assets/', '');
+              select.appendChild(opt);
+            }
+          });
+          select.onchange = () => {
+            preview.src = '/' + select.value;
+            galleryItemsList[index].image = select.value;
+          };
+          controls.appendChild(select);
+
+          const uploadLabel = document.createElement('label');
+          uploadLabel.className = 'btn-upload-label';
+          uploadLabel.textContent = 'Качи нова...';
+          
+          const fileInput = document.createElement('input');
+          fileInput.type = 'file';
+          fileInput.accept = 'image/*';
+          fileInput.style.display = 'none';
+          fileInput.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            showLoading(true);
+            const reader = new FileReader();
+            reader.onload = (re) => {
+              apiFetch('/api/upload', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ filename: file.name, base64: re.target.result })
+              })
+              .then(r => r.json())
+              .then(uploadData => {
+                showLoading(true);
+                if (uploadData.success) {
+                  showToast('Качено успешно!', 'success');
+                  fetchAssetsList().then(() => {
+                    showLoading(false);
+                    const opt = document.createElement('option');
+                    opt.value = uploadData.url;
+                    opt.textContent = file.name;
+                    select.appendChild(opt);
+                    select.value = uploadData.url;
+                    preview.src = '/' + uploadData.url;
+                    galleryItemsList[index].image = uploadData.url;
+                  });
+                } else {
+                  showLoading(false);
+                  showToast(uploadData.error, 'danger');
+                }
+              }).catch(err => {
+                showLoading(false);
+                showToast(err.message, 'danger');
+              });
+            };
+            reader.readAsDataURL(file);
+          };
+          uploadLabel.appendChild(fileInput);
+          controls.appendChild(uploadLabel);
+
+          imgBox.appendChild(controls);
+          imgGroup.appendChild(imgBox);
+        }
         grid.appendChild(imgGroup);
 
         // Details grid column
@@ -2086,16 +2218,21 @@
               <option value="Груб строеж" ${item.tag === 'Груб строеж' ? 'selected' : ''}>Груб строеж</option>
               <option value="Довършителни" ${item.tag === 'Довършителни' ? 'selected' : ''}>Довършителни</option>
               <option value="До ключ" ${item.tag === 'До ключ' ? 'selected' : ''}>До ключ</option>
-              <option value="Екипът ни" ${item.tag === 'Екипът ни' ? 'selected' : ''}>Екипът ни</option>
             </select>
           </div>
           <div style="margin-bottom: 12px;">
             <label class="form-label" for="gallery-desc-${index}">Кратко описание</label>
             <input class="form-control" type="text" id="gallery-desc-${index}" value="${item.desc}" onchange="updateGalleryItemProp(${index}, 'desc', this.value)" placeholder="Напр. Изграждане на покривна конструкция">
           </div>
-          <div style="display:flex; align-items:center; gap: 8px;">
-            <input type="checkbox" id="gallery-wide-${index}" ${item.wide ? 'checked' : ''} onchange="updateGalleryItemProp(${index}, 'wide', this.checked)" style="width:16px; height:16px; cursor:pointer;">
-            <label for="gallery-wide-${index}" style="cursor:pointer; font-size:13px; color: var(--text-muted);">Широк размер (заема 2 колони в решетката)</label>
+          <div style="display:flex; align-items:center; gap: 15px; margin-bottom: 8px;">
+            <div style="display:flex; align-items:center; gap: 6px;">
+              <input type="checkbox" id="gallery-wide-${index}" ${item.wide ? 'checked' : ''} onchange="updateGalleryItemProp(${index}, 'wide', this.checked)" style="width:16px; height:16px; cursor:pointer;">
+              <label for="gallery-wide-${index}" style="cursor:pointer; font-size:12px; color: var(--text-muted);">Широк (2 колони)</label>
+            </div>
+            <div style="display:flex; align-items:center; gap: 6px;">
+              <input type="checkbox" id="gallery-split-${index}" ${item.isSplit ? 'checked' : ''} onchange="toggleGalleryItemSplit(${index}, this.checked)" style="width:16px; height:16px; cursor:pointer;">
+              <label for="gallery-split-${index}" style="cursor:pointer; font-size:12px; color: var(--text-muted); font-weight: 600;">Режим „Преди / След“</label>
+            </div>
           </div>
         `;
         grid.appendChild(detailsGroup);
@@ -2119,6 +2256,16 @@
     function updateGalleryItemProp(idx, prop, val) {
       if (galleryItemsList[idx]) {
         galleryItemsList[idx][prop] = val;
+      }
+    }
+
+    function toggleGalleryItemSplit(idx, isSplit) {
+      if (galleryItemsList[idx]) {
+        galleryItemsList[idx].isSplit = isSplit;
+        if (isSplit && !galleryItemsList[idx].imageBefore) {
+          galleryItemsList[idx].imageBefore = galleryItemsList[idx].image || (libraryAssets.length > 0 ? libraryAssets[0] : 'assets/service-rough.png');
+        }
+        renderGalleryItemsUI();
       }
     }
 
@@ -2191,27 +2338,50 @@
         mainListContainer.innerHTML = '';
 
         galleryItemsList.forEach(item => {
-          const itemNode = templateNode.cloneNode(true);
-          
-          // Apply class wide
-          if (item.wide) {
-            itemNode.className = 'gallery-item wide';
+          let itemNode;
+          if (item.isSplit) {
+            itemNode = galleryDoc.createElement('div');
+            itemNode.className = item.wide ? 'gallery-item before-after wide' : 'gallery-item before-after';
+            itemNode.setAttribute('data-item', '');
+            itemNode.innerHTML = `
+              <div class="split-images">
+                <div class="split-img-box">
+                  <span class="split-label">Преди</span>
+                  <img src="${item.imageBefore}" alt="Преди" data-field="image-before">
+                </div>
+                <div class="split-img-box">
+                  <span class="split-label">След</span>
+                  <img src="${item.image}" alt="След" data-field="image-after">
+                </div>
+              </div>
+              <div class="gallery-caption">
+                <span class="tag" data-field="tag">${item.tag}</span>
+                <span class="desc" data-field="desc">${item.desc}</span>
+              </div>
+            `;
           } else {
-            itemNode.className = 'gallery-item';
-          }
-          itemNode.setAttribute('data-item', '');
-
-          const imgEl = itemNode.querySelector('[data-field="image"]');
-          const tagEl = itemNode.querySelector('[data-field="tag"]');
-          const descEl = itemNode.querySelector('[data-field="desc"]');
-
-          if (imgEl) {
+            itemNode = templateNode.cloneNode(true);
+            itemNode.className = item.wide ? 'gallery-item wide' : 'gallery-item';
+            itemNode.setAttribute('data-item', '');
+            
+            // Remove split-images if cloned template had it
+            const splitEl = itemNode.querySelector('.split-images');
+            if (splitEl) splitEl.remove();
+            
+            let imgEl = itemNode.querySelector('[data-field="image"]');
+            if (!imgEl) {
+              imgEl = galleryDoc.createElement('img');
+              imgEl.setAttribute('data-field', 'image');
+              itemNode.insertBefore(imgEl, itemNode.querySelector('.gallery-caption'));
+            }
             imgEl.setAttribute('src', item.image);
             imgEl.setAttribute('alt', item.desc || item.tag);
-          }
-          if (tagEl) tagEl.textContent = item.tag;
-          if (descEl) descEl.textContent = item.desc;
 
+            const tagEl = itemNode.querySelector('[data-field="tag"]');
+            const descEl = itemNode.querySelector('[data-field="desc"]');
+            if (tagEl) tagEl.textContent = item.tag;
+            if (descEl) descEl.textContent = item.desc;
+          }
           mainListContainer.appendChild(itemNode);
         });
 

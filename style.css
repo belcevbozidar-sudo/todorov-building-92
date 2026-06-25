@@ -954,3 +954,206 @@ h1, h2, h3 {
   .stat-row { grid-template-columns: 1fr; }
   .cta-banner h2 { font-size: 24px; }
 }
+
+/* ---------- Reviews Section ---------- */
+.reviews-section {
+  background: radial-gradient(circle at 80% 20%, rgba(212, 175, 55, 0.05) 0%, transparent 50%),
+              radial-gradient(circle at 20% 80%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+              var(--bg-dark);
+  position: relative;
+}
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 40px;
+  gap: 30px;
+}
+
+@media (max-width: 768px) {
+  .reviews-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 15px;
+  }
+}
+
+.rating-summary-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  border-radius: 16px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.rating-summary-num {
+  font-family: 'Montserrat', sans-serif;
+  font-size: 38px;
+  font-weight: 800;
+  background: var(--gold-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  line-height: 1;
+}
+
+.rating-summary-details .stars {
+  color: var(--gold-2);
+  font-size: 18px;
+  letter-spacing: 2px;
+  margin-bottom: 4px;
+}
+
+.rating-summary-details .count {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.review-card {
+  background: var(--bg-card);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 28px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  border-color: rgba(212, 175, 55, 0.2);
+}
+
+.review-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 15px;
+}
+
+.reviewer-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reviewer-avatar {
+  width: 40px;
+  height: 40px;
+  background: rgba(212, 175, 55, 0.1);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Montserrat', sans-serif;
+  font-weight: 700;
+  color: var(--gold-1);
+  font-size: 15px;
+}
+
+.reviewer-name {
+  font-weight: 600;
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 2px;
+}
+
+.review-date {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.google-icon-badge {
+  width: 18px;
+  height: 18px;
+  opacity: 0.8;
+}
+
+.review-stars {
+  color: var(--gold-2);
+  font-size: 14px;
+  letter-spacing: 1px;
+  margin-bottom: 15px;
+}
+
+.review-text {
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  font-style: italic;
+  flex-grow: 1;
+}
+
+/* ---------- Before/After split image gallery cards ---------- */
+.gallery-item .split-images {
+  display: flex;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
+}
+
+.gallery-item .split-img-box {
+  flex: 1;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.gallery-item .split-img-box:first-child {
+  border-right: 2px solid var(--bg-dark);
+}
+
+.gallery-item .split-img-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.gallery-item .split-img-box:hover img {
+  transform: scale(1.05);
+}
+
+.gallery-item .split-label {
+  position: absolute;
+  top: 15px;
+  background: rgba(11, 15, 25, 0.85);
+  backdrop-filter: blur(4px);
+  color: #fff;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  z-index: 5;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.gallery-item .split-img-box:first-child .split-label {
+  left: 15px;
+}
+
+.gallery-item .split-img-box:last-child .split-label {
+  right: 15px;
+  background: rgba(212, 175, 55, 0.95);
+  color: var(--bg-dark);
+}
+
