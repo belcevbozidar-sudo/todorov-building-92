@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/hero-real.jpg">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -83,7 +84,7 @@
       </div>
     </div>
     <div class="hero-media">
-      <img src="assets/hero-real.jpg" alt="Завършен обект на Тодоров Билдинг 92" data-edit="hero-image">
+      <img src="assets/hero-real.jpg" alt="Завършен обект на Тодоров Билдинг 92" data-edit="hero-image" fetchpriority="high" decoding="sync">
       <div class="hero-rating">
         <div class="stars" data-edit="hero-rating-stars">★★★★★</div>
         <div>
@@ -108,7 +109,7 @@
 
       <a href="service-rough-construction.html" class="service-card" data-item>
         <div class="service-photo">
-          <img src="assets/service-rough.png" alt="Груб строеж" data-field="image">
+          <img src="assets/service-rough.jpg" alt="Груб строеж" data-field="image" loading="lazy" decoding="async">
           <span class="service-num" data-field="num">01</span>
         </div>
         <div class="service-body">
@@ -120,7 +121,7 @@
 
       <a href="service-finishing-works.html" class="service-card" data-item>
         <div class="service-photo">
-          <img src="assets/service-finishing.png" alt="Довършителни работи" data-field="image">
+          <img src="assets/service-finishing.jpg" alt="Довършителни работи" data-field="image" loading="lazy" decoding="async">
           <span class="service-num" data-field="num">02</span>
         </div>
         <div class="service-body">
@@ -132,7 +133,7 @@
 
       <a href="service-turnkey-projects.html" class="service-card" data-item>
         <div class="service-photo">
-          <img src="assets/service-turnkey.png" alt="Проекти до ключ" data-field="image">
+          <img src="assets/service-turnkey.jpg" alt="Проекти до ключ" data-field="image" loading="lazy" decoding="async">
           <span class="service-num" data-field="num">03</span>
         </div>
         <div class="service-body">
@@ -150,7 +151,7 @@
   <div class="container">
     <div class="why-us">
       <div class="why-us-media">
-        <img src="assets/service-rough.png" alt="Строителство с договорна сигурност" data-edit="why-image">
+        <img src="assets/service-rough.jpg" alt="Строителство с договорна сигурност" data-edit="why-image" loading="lazy" decoding="async">
       </div>
       <div class="why-us-content">
         <span class="eyebrow" data-edit="why-eyebrow">Защо да изберете нас?</span>
@@ -219,7 +220,7 @@
         </div>
       </div>
       <div class="locations-media">
-        <img src="assets/gallery-wide.png" alt="Строителство в региона на Ямбол" data-edit="locations-image">
+        <img src="assets/gallery-wide.jpg" alt="Строителство в региона на Ямбол" data-edit="locations-image" loading="lazy" decoding="async">
       </div>
     </div>
   </div>
@@ -247,50 +248,16 @@
         <div>
           <div class="review-card-top">
             <div class="reviewer-info">
-              <div class="reviewer-avatar" data-field="avatar">ГВ</div>
+              <div class="reviewer-avatar" data-field="avatar">К</div>
               <div>
-                <div class="reviewer-name" data-field="name">Георги Василев</div>
-                <div class="review-date" data-field="date">преди 2 месеца</div>
-              </div>
-            </div>
-            <svg class="google-icon-badge" viewBox="0 0 24 24" width="18" height="18"><path fill="#EA4335" d="M12 5.04c1.65 0 3.12.57 4.29 1.69l3.21-3.21C17.55 1.76 14.99 1 12 1 7.37 1 3.42 3.66 1.47 7.56l3.85 2.99c.9-2.7 3.4-4.51 6.68-4.51z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.73-2.38 3.58l3.69 2.87c2.16-1.99 3.4-4.92 3.4-8.55z"/><path fill="#FBBC05" d="M5.32 14.45c-.23-.69-.36-1.43-.36-2.2s.13-1.51.36-2.2L1.47 7.06C.53 8.94 0 11.04 0 13.25c0 2.21.53 4.31 1.47 6.19l3.85-2.99z"/><path fill="#34A853" d="M12 23c3.24 0 5.95-1.07 7.94-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.25 1.09-3.28 0-6.08-2.21-7.07-5.21L1.08 16.1C3.03 20.01 6.98 23 12 23z"/></svg>
-          </div>
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text" data-field="text">"Изключително доволен съм от работата на Денис и неговия екип. Бяха много коректни, спазиха всички срокове за грубия строеж на къщата ни и цената беше точно тази, която договорихме първоначално. Препоръчвам с две ръце!"</p>
-        </div>
-      </div>
-
-      <div class="review-card" data-item>
-        <div>
-          <div class="review-card-top">
-            <div class="reviewer-info">
-              <div class="reviewer-avatar" data-field="avatar">МИ</div>
-              <div>
-                <div class="reviewer-name" data-field="name">Мария Иванова</div>
-                <div class="review-date" data-field="date">преди 1 месец</div>
-              </div>
-            </div>
-            <svg class="google-icon-badge" viewBox="0 0 24 24" width="18" height="18"><path fill="#EA4335" d="M12 5.04c1.65 0 3.12.57 4.29 1.69l3.21-3.21C17.55 1.76 14.99 1 12 1 7.37 1 3.42 3.66 1.47 7.56l3.85 2.99c.9-2.7 3.4-4.51 6.68-4.51z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.73-2.38 3.58l3.69 2.87c2.16-1.99 3.4-4.92 3.4-8.55z"/><path fill="#FBBC05" d="M5.32 14.45c-.23-.69-.36-1.43-.36-2.2s.13-1.51.36-2.2L1.47 7.06C.53 8.94 0 11.04 0 13.25c0 2.21.53 4.31 1.47 6.19l3.85-2.99z"/><path fill="#34A853" d="M12 23c3.24 0 5.95-1.07 7.94-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.25 1.09-3.28 0-6.08-2.21-7.07-5.21L1.08 16.1C3.03 20.01 6.98 23 12 23z"/></svg>
-          </div>
-          <div class="review-stars">★★★★★</div>
-          <p class="review-text" data-field="text">"Благодарим на Тодоров Билдинг 92 за прекрасния ремонт на нашия апартамент до ключ в Ямбол! Всичко беше изпълнено с изключително внимание към детайла и материалите бяха с високо качество. Много професионално отношение!"</p>
-        </div>
-      </div>
-
-      <div class="review-card" data-item>
-        <div>
-          <div class="review-card-top">
-            <div class="reviewer-info">
-              <div class="reviewer-avatar" data-field="avatar">ПД</div>
-              <div>
-                <div class="reviewer-name" data-field="name">Петър Димитров</div>
+                <div class="reviewer-name" data-field="name">Kristiyan Mirchev</div>
                 <div class="review-date" data-field="date">преди 3 месеца</div>
               </div>
             </div>
             <svg class="google-icon-badge" viewBox="0 0 24 24" width="18" height="18"><path fill="#EA4335" d="M12 5.04c1.65 0 3.12.57 4.29 1.69l3.21-3.21C17.55 1.76 14.99 1 12 1 7.37 1 3.42 3.66 1.47 7.56l3.85 2.99c.9-2.7 3.4-4.51 6.68-4.51z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.73-2.38 3.58l3.69 2.87c2.16-1.99 3.4-4.92 3.4-8.55z"/><path fill="#FBBC05" d="M5.32 14.45c-.23-.69-.36-1.43-.36-2.2s.13-1.51.36-2.2L1.47 7.06C.53 8.94 0 11.04 0 13.25c0 2.21.53 4.31 1.47 6.19l3.85-2.99z"/><path fill="#34A853" d="M12 23c3.24 0 5.95-1.07 7.94-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.25 1.09-3.28 0-6.08-2.21-7.07-5.21L1.08 16.1C3.03 20.01 6.98 23 12 23z"/></svg>
           </div>
           <div class="review-stars">★★★★★</div>
-          <p class="review-text" data-field="text">"Рядко се срещат толкова коректни строители. Направиха ни ремонт на покрива и довършителни работи бързо и качествено. Винаги бяха на разположение за въпроси и обясняваха всеки детайл. Точност и професионализъм!"</p>
+          <p class="review-text" data-field="text">"Много съм доволен от работата на момчетата! 💪 Работиха бързо, чисто и качествено, като всичко беше изпълнено точно както трябва. 🔧✨ Коректни и точни – препоръчвам ги с две ръце на всеки, който търси надеждни и кадърни майстори! 👍..."</p>
         </div>
       </div>
 
@@ -298,16 +265,50 @@
         <div>
           <div class="review-card-top">
             <div class="reviewer-info">
-              <div class="reviewer-avatar" data-field="avatar">СК</div>
+              <div class="reviewer-avatar" data-field="avatar">М</div>
               <div>
-                <div class="reviewer-name" data-field="name">Стефан Колев</div>
-                <div class="review-date" data-field="date">преди 5 месеца</div>
+                <div class="reviewer-name" data-field="name">Monica Todorova</div>
+                <div class="review-date" data-field="date">преди 11 месеца</div>
               </div>
             </div>
             <svg class="google-icon-badge" viewBox="0 0 24 24" width="18" height="18"><path fill="#EA4335" d="M12 5.04c1.65 0 3.12.57 4.29 1.69l3.21-3.21C17.55 1.76 14.99 1 12 1 7.37 1 3.42 3.66 1.47 7.56l3.85 2.99c.9-2.7 3.4-4.51 6.68-4.51z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.73-2.38 3.58l3.69 2.87c2.16-1.99 3.4-4.92 3.4-8.55z"/><path fill="#FBBC05" d="M5.32 14.45c-.23-.69-.36-1.43-.36-2.2s.13-1.51.36-2.2L1.47 7.06C.53 8.94 0 11.04 0 13.25c0 2.21.53 4.31 1.47 6.19l3.85-2.99z"/><path fill="#34A853" d="M12 23c3.24 0 5.95-1.07 7.94-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.25 1.09-3.28 0-6.08-2.21-7.07-5.21L1.08 16.1C3.03 20.01 6.98 23 12 23z"/></svg>
           </div>
           <div class="review-stars">★★★★★</div>
-          <p class="review-text" data-field="text">"Много добро качество на работа и перфектна комуникация. Бригадата си знае работата, работят чисто и спазват сроковете. Изключително коректна фирма за Ямбол и региона."</p>
+          <p class="review-text" data-field="text">"Изключително качество и отговорност към изпълнението ! Всичко беше направено така както искахме ! Препоръчвам с две ръце !"</p>
+        </div>
+      </div>
+
+      <div class="review-card" data-item>
+        <div>
+          <div class="review-card-top">
+            <div class="reviewer-info">
+              <div class="reviewer-avatar" data-field="avatar">Д</div>
+              <div>
+                <div class="reviewer-name" data-field="name">Десислава Иванова Иванова</div>
+                <div class="review-date" data-field="date">преди 11 месеца</div>
+              </div>
+            </div>
+            <svg class="google-icon-badge" viewBox="0 0 24 24" width="18" height="18"><path fill="#EA4335" d="M12 5.04c1.65 0 3.12.57 4.29 1.69l3.21-3.21C17.55 1.76 14.99 1 12 1 7.37 1 3.42 3.66 1.47 7.56l3.85 2.99c.9-2.7 3.4-4.51 6.68-4.51z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.73-2.38 3.58l3.69 2.87c2.16-1.99 3.4-4.92 3.4-8.55z"/><path fill="#FBBC05" d="M5.32 14.45c-.23-.69-.36-1.43-.36-2.2s.13-1.51.36-2.2L1.47 7.06C.53 8.94 0 11.04 0 13.25c0 2.21.53 4.31 1.47 6.19l3.85-2.99z"/><path fill="#34A853" d="M12 23c3.24 0 5.95-1.07 7.94-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.25 1.09-3.28 0-6.08-2.21-7.07-5.21L1.08 16.1C3.03 20.01 6.98 23 12 23z"/></svg>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text" data-field="text">"Всичко беше изпълнено в дадените от тях срокове и то изключително качествено.Много съм доволна от екипа. Изпипват си работата до най-малките детайли!"</p>
+        </div>
+      </div>
+
+      <div class="review-card" data-item>
+        <div>
+          <div class="review-card-top">
+            <div class="reviewer-info">
+              <div class="reviewer-avatar" data-field="avatar">Ц</div>
+              <div>
+                <div class="reviewer-name" data-field="name">Цветелин Петков</div>
+                <div class="review-date" data-field="date">преди 11 месеца</div>
+              </div>
+            </div>
+            <svg class="google-icon-badge" viewBox="0 0 24 24" width="18" height="18"><path fill="#EA4335" d="M12 5.04c1.65 0 3.12.57 4.29 1.69l3.21-3.21C17.55 1.76 14.99 1 12 1 7.37 1 3.42 3.66 1.47 7.56l3.85 2.99c.9-2.7 3.4-4.51 6.68-4.51z"/><path fill="#4285F4" d="M23.49 12.27c0-.81-.07-1.59-.2-2.34H12v4.44h6.44c-.28 1.48-1.12 2.73-2.38 3.58l3.69 2.87c2.16-1.99 3.4-4.92 3.4-8.55z"/><path fill="#FBBC05" d="M5.32 14.45c-.23-.69-.36-1.43-.36-2.2s.13-1.51.36-2.2L1.47 7.06C.53 8.94 0 11.04 0 13.25c0 2.21.53 4.31 1.47 6.19l3.85-2.99z"/><path fill="#34A853" d="M12 23c3.24 0 5.95-1.07 7.94-2.91l-3.69-2.87c-1.02.68-2.33 1.09-4.25 1.09-3.28 0-6.08-2.21-7.07-5.21L1.08 16.1C3.03 20.01 6.98 23 12 23z"/></svg>
+          </div>
+          <div class="review-stars">★★★★★</div>
+          <p class="review-text" data-field="text">"Бързо се отзоваха да дадат Оферта на обекта,която беше много добра.Спазиха срока за започване на работния процес както и Срока на Изпълнение.Качеството на работа е СТРАХОТНО,остахме супер изненадани и доволни от вниманието и старанието към детайлите..Определено мислят за клиентите и имиджа на фирмата си.С мисъл за комфорта и уюта на крайния потребител.Препоръчвам с две ръце.Аз и моето семейство отново бихме им се доверили в бъдещи проекти за съвместна работа..."</p>
         </div>
       </div>
 
@@ -342,7 +343,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="index.html" class="brand">
-          <img src="assets/logo.png" alt="ТОДОРОВ Билдинг 92" class="brand-logo-img">
+          <img src="assets/logo.png" alt="ТОДОРОВ Билдинг 92" class="brand-logo-img" loading="lazy" decoding="async">
         </a>
         <p data-edit="footer-about-text">Строителна фирма в град Ямбол с над 15 години опит. Груб строеж, довършителни работи и проекти „до ключ“ — с гарантирано качество и възможност за писмен договор.</p>
         <div class="footer-social">

@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400;1,500&amp;display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/service-finishing.jpg">
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -107,7 +108,7 @@
       </div>
 
       <div class="service-side">
-        <div class="service-side-media"><img src="assets/service-finishing.png" alt="Довършителни работи" data-edit="details-image"></div>
+        <div class="service-side-media"><img src="assets/service-finishing.jpg" alt="Довършителни работи" data-edit="details-image" fetchpriority="high" decoding="sync"></div>
         <div class="advantage-box">
           <h4 data-edit="advantages-title">Нашите предимства</h4>
           <div class="feature-list" data-list="advantages">
@@ -143,7 +144,7 @@
     <div class="footer-grid">
       <div class="footer-brand">
         <a href="index.html" class="brand">
-          <img src="assets/logo.png" alt="ТОДОРОВ Билдинг 92" class="brand-logo-img">
+          <img src="assets/logo.png" alt="ТОДОРОВ Билдинг 92" class="brand-logo-img" loading="lazy" decoding="async">
         </a>
         <p data-edit="footer-about-text">Строителна фирма в град Ямбол с над 15 години опит. Груб строеж, довършителни работи и проекти „до ключ“ — с гарантирано качество и възможност за писмен договор.</p>
         <div class="footer-social">

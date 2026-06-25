@@ -2025,7 +2025,7 @@
             const preview = document.createElement('img');
             preview.className = 'image-preview';
             preview.style.height = '70px';
-            const imgVal = item[imgProp] || 'assets/service-rough.png';
+            const imgVal = item[imgProp] || 'assets/service-rough.jpg';
             preview.src = '/' + imgVal;
             preview.id = previewId;
             box.appendChild(preview);
@@ -2263,7 +2263,7 @@
       if (galleryItemsList[idx]) {
         galleryItemsList[idx].isSplit = isSplit;
         if (isSplit && !galleryItemsList[idx].imageBefore) {
-          galleryItemsList[idx].imageBefore = galleryItemsList[idx].image || (libraryAssets.length > 0 ? libraryAssets[0] : 'assets/service-rough.png');
+          galleryItemsList[idx].imageBefore = galleryItemsList[idx].image || (libraryAssets.length > 0 ? libraryAssets[0] : 'assets/service-rough.jpg');
         }
         renderGalleryItemsUI();
       }
@@ -2289,7 +2289,7 @@
 
     function addGalleryItem() {
       // Find a default image if library has any
-      const defaultImg = libraryAssets.length > 0 ? libraryAssets[0] : 'assets/service-rough.png';
+      const defaultImg = libraryAssets.length > 0 ? libraryAssets[0] : 'assets/service-rough.jpg';
       galleryItemsList.push({
         image: defaultImg,
         tag: 'Груб строеж',
